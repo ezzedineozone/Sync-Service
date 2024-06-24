@@ -6,7 +6,7 @@
 
 int main()
 {
-    std::cout << "Hello World!\n";
-
-}
+	SyncService* obj = new SyncService();
+	obj->instantiate_service();
+};
 
