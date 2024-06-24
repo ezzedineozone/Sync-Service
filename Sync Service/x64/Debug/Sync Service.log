@@ -1,0 +1,8 @@
+﻿  Sync Service.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\filesystem(13): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.h(8,31): error C3083: 'filesystem': the symbol to the left of a '::' must be a type
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.h(8,43): error C2039: 'path': is not a member of 'std'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\iostream(19,1): message : see declaration of 'std'
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.h(8,48): error C2061: syntax error: identifier 'path'
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.h(8,6): error C2535: 'int SyncService::instantiate_service(void)': member function already defined or declared
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.h(7,6): message : see declaration of 'SyncService::instantiate_service'
