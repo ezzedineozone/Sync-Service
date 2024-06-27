@@ -1,11 +1,14 @@
 #ifndef SYNCSERVICE_H
 #define SYNCSERVICE_H
 #include <filesystem>
+#include "storedPaths.h"
+#include "sqlite3/sqlite3.h"
 namespace fs = std::filesystem;
 class SyncService {
 public:
-	static fs::path default_path;
-	fs::path service_path;
+	StoredPaths paths;
+	sqlite3* db;
+
 
 
 	SyncService();
@@ -13,8 +16,9 @@ public:
 
 	int instantiate_service();
 	int instantiate_service(fs::path path);
+	int create_files();
 private:
-	std::filesystem::path find_existing_service(fs::path path);
-	int checkServiceValidity(fs::path path);
+	fs::path find_existing_service(fs::path path);
+	int check_service_validity(fs::path path);
 };
 #endif // !SYNCSERVICE_H

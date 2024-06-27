@@ -128,10 +128,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="sync_service.cpp" />
+    <ClCompile Include="storedPaths.cpp" />
+    <ClCompile Include="sqlite3\sqlite3.c" />
     <ClCompile Include="Sync Service.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sqlite3\sqlite3.h" />
+    <ClInclude Include="storedPaths.h" />
     <ClInclude Include="sync_service.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
