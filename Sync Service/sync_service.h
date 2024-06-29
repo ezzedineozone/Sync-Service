@@ -20,5 +20,6 @@ public:
 private:
 	fs::path find_existing_service(fs::path path);
 	int check_service_validity(fs::path path);
+	int create_db_schema();
 };
 #endif // !SYNCSERVICE_H

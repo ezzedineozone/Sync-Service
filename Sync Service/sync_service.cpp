@@ -7,6 +7,7 @@ namespace fs = std::filesystem;
 
 
 SyncService::SyncService() {
+	db = nullptr;
 };
 int SyncService::instantiate_service(fs::path path) {
 	fs::path existing_path = find_existing_service(path);
@@ -21,6 +22,7 @@ int SyncService::instantiate_service(fs::path path) {
 			std::cout << "created succesfully! \n";
 			paths.getServicePath() = combined_paths;
 			int files_created = create_files();
+			int schema_created = create_db_schema();
 		}
 		else
 			std::cout << "something went wrong creating service directory \n";
@@ -39,7 +41,7 @@ int SyncService::instantiate_service(fs::path path) {
 		else
 		{
 			std::cout << "existing service folder invalid... \n deleting and creating a new one ... \n";
-			bool removal_success = fs::remove(existing_path);
+			bool removal_success = fs::remove_all(existing_path);
 			if (removal_success)
 			{
 				std::cout << "existing service folder deleted \n creating a new one...\n";
@@ -74,7 +76,7 @@ fs::path SyncService::find_existing_service(fs::path path) {
 };
 int SyncService::check_service_validity(fs::path path) {
 	//returns 0 if service files are valid, 1 otherwise, could maybe be used as a future update checker for the service???
-	return 1;
+	return 0;
 };
 
 
@@ -84,16 +86,18 @@ int SyncService::create_files()
 	if(paths.getServicePath() != fs::path())
 	{
 		std::cout << "service path is created... \n";
+		std::cout << "begin creation of database... \n";
 		fs::path sqlite3_path = paths.getServicePath() / "sqlite3";
 		std::cout << "sqlite3_path" << sqlite3_path << "\n";
 		bool sqlite3_dir_created = fs::create_directory(sqlite3_path);
 		if (sqlite3_dir_created)
 		{
 			fs::path sqlite3_file_path = sqlite3_path /  fs::path("database.db");
-
 			int result = sqlite3_open(reinterpret_cast<const char*>(sqlite3_file_path.string().c_str()), &db);
 			if (result == SQLITE_OK)
-				std::cout << "database created... \n";
+			{
+				std::cout << "database file created... \n";
+			}
 			else
 				std::cout << "something went wrong creating database... \n";
 		}
@@ -106,6 +110,23 @@ int SyncService::create_files()
 	else
 	{
 		std::cout << "service not instantiated, please run the instantiate_service() function";
+	}
+	return 1;
+};
+int SyncService::create_db_schema() {
+	std::cout << "begin creating of database schema...\n";
+	if (db == nullptr)
+		std::cout << "database connection not established, please run create_files() function";
+	else
+	{
+		//code below is for the sync module table
+		const char* sync_module_statement = "CREATE TABLE SYNCMODULE(id TEXT PRIMARY KEY, source VARCHAR(259) NOT NULL, destination VARCHAR(259) NOT NULL, type VARCHAR(15) NOT NULL, direction VARCHAR(15) NOT NULL);";
+		char* error_msg;
+		int sync_module_table_created = sqlite3_exec(db, sync_module_statement, nullptr, nullptr,&error_msg);
+		if (sync_module_table_created == SQLITE_OK)
+			std::cout << "Sync module table created succesfully \n";
+		else
+			std::cout << "Sync module table creation error \n" << error_msg << "\n";
 	}
 	return 1;
 };

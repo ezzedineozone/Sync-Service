@@ -131,7 +131,7 @@
     <ClCompile Include="sync_service.cpp" />
     <ClCompile Include="storedPaths.cpp" />
     <ClCompile Include="sqlite3\sqlite3.c" />
-    <ClCompile Include="Sync Service.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite3\sqlite3.h" />
