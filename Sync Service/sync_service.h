@@ -3,10 +3,12 @@
 #include <filesystem>
 #include "storedPaths.h"
 #include "sqlite3/sqlite3.h"
+#include "sync_service_config.h"
 namespace fs = std::filesystem;
 class SyncService {
 public:
 	StoredPaths paths;
+	SyncServiceConfig config;
 	sqlite3* db;
 
 
