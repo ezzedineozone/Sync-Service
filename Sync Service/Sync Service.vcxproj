@@ -128,15 +128,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="sync_module.cpp" />
     <ClCompile Include="sync_service.cpp" />
-    <ClCompile Include="storedPaths.cpp" />
+    <ClCompile Include="stored_paths.cpp" />
     <ClCompile Include="sqlite3\sqlite3.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sync_service_config.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite3\sqlite3.h" />
-    <ClInclude Include="storedPaths.h" />
+    <ClInclude Include="stored_paths.h" />
+    <ClInclude Include="sync_module.h" />
     <ClInclude Include="sync_service.h" />
     <ClInclude Include="sync_service_config.h" />
   </ItemGroup>

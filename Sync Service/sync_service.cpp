@@ -37,6 +37,7 @@ int SyncService::instantiate_service(fs::path path) {
 			paths.getServicePath() = combined_paths;
 			int files_created = create_files();
 			int schema_created = create_db_schema();
+			int sync_modules_loaded = load_sync_modules();
 		}
 		else
 			std::cout << "something went wrong creating service directory \n";
@@ -140,7 +141,7 @@ int SyncService::create_db_schema() {
 	else
 	{
 		//code below is for the SYNCMODULE table
-		const char* sync_module_statement = "CREATE TABLE SYNCMODULE(id TEXT PRIMARY KEY, source VARCHAR(259) NOT NULL, destination VARCHAR(259) NOT NULL, type VARCHAR(15) NOT NULL, direction VARCHAR(15) NOT NULL);";
+		const char* sync_module_statement = "CREATE TABLE SYNCMODULE(name TEXT PRIMARY KEY, source VARCHAR(259) NOT NULL, destination VARCHAR(259) NOT NULL, type VARCHAR(15) NOT NULL, direction VARCHAR(15) NOT NULL);";
 		char* sync_module_error_msg;
 		int sync_module_table_created = sqlite3_exec(db, sync_module_statement, nullptr, nullptr,&sync_module_error_msg);
 		if (sync_module_table_created == SQLITE_OK)
@@ -182,4 +183,45 @@ int SyncService::create_db_schema() {
 			return -1;
 		}
 	}
+};
+int SyncService::load_sync_modules() {
+	// code below adds a dummy sync module
+	// temp code remove before release
+	const char* add_stmt = "INSERT INTO SYNCMODULE VALUES ('test_module', 'C:\\Users\\Administrator\\Documents\\VS Projects\\Sync Service', 'C:\\test_folder', 'local', 'one-way');";
+	char* add_err_msg;
+	int dummy_inserted = sqlite3_exec(db, add_stmt, nullptr, nullptr, &add_err_msg);
+	if (dummy_inserted == SQLITE_OK)
+	{
+		std::cout << "dummy syncmodule inserted succesfully \n";
+	}
+	else
+	{
+		std::cout << "something went wrong inserting dummy \n" << add_err_msg << "\n";
+		return 0;
+	}
+
+
+
+	const char* sql_stmt = "SELECT * FROM SYNCMODULE;";
+	sqlite3_stmt* ppStmt;
+	int sync_modules_querry = sqlite3_prepare_v2(db, sql_stmt, -1, &ppStmt, nullptr);
+	if (sync_modules_querry == SQLITE_OK)
+	{
+		std::cout << "sync modules querried succesfully\n";
+		int sync_modules_querried = sqlite3_step(ppStmt);
+		while (sync_modules_querried == SQLITE_ROW)
+		{
+			std::string name = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 0)));
+			fs::path source = fs::path(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 1)));
+			fs::path destination = fs::path(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 2)));
+			std::string type = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 3)));
+			std::string direction = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 4)));
+			this->sync_modules.push_back(SyncModule(name, source, destination, type, direction));
+			sync_modules_querried = sqlite3_step(ppStmt);
+		}
+		if (sync_modules_querried == SQLITE_DONE)
+			return 1;
+		return 0;
+	}
+	return 0;
 };

@@ -18,9 +18,10 @@ int commandHandler(std::string command)
 int requestCommand() {
 	std::string command;
 	std::cout << "sync_service 0.1.0: ";
-	std::cin.clear();
 	std::getline(std::cin, command);
-	return commandHandler(command);
+	int return_val = commandHandler(command);
+	while ((getchar()) != '\n');
+	return return_val;
 };
 int main()
 {

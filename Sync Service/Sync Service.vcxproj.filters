@@ -24,10 +24,13 @@
     <ClCompile Include="sqlite3\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="storedPaths.cpp">
+    <ClCompile Include="stored_paths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sync_service_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sync_module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,13 +38,16 @@
     <ClInclude Include="sync_service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="storedPaths.h">
+    <ClInclude Include="stored_paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sqlite3\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sync_service_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sync_module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

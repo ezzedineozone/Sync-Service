@@ -1,2 +1,7 @@
-﻿  main.cpp
+﻿  sync_service.cpp
+  main.cpp
+  sync_service_config.cpp
+  Generating Code...
+C:\Users\Administrator\Documents\VS Projects\Sync Service\Sync Service\sync_service.cpp(186): warning C4715: 'SyncService::create_db_schema': not all control paths return a value
+  sqlite3.c
   Sync Service.vcxproj -> C:\Users\Administrator\Documents\VS Projects\Sync Service\x64\Debug\Sync Service.exe
