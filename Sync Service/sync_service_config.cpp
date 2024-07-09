@@ -1,5 +1,5 @@
 #include "sync_service_config.h"
-#include "sqlite3/sqlite3.h"
+#include "dependencies/sqlite3/sqlite3.h"
 #include <iostream>
 SyncServiceConfig::SyncServiceConfig(sqlite3* db) {
 	const char* config_query = "SELECT * FROM SYNCSERVICECONFIG";

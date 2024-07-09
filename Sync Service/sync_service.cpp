@@ -5,16 +5,26 @@
 #include <stdlib.h>
 #include <cstring>
 #include <sstream>
-#include "sqlite3/sqlite3.h"
+#include "sqlite3.h"
 namespace fs = std::filesystem;
 
 
 SyncService::SyncService() {
+
 	db = nullptr;
 	this->paths = StoredPaths();
 	this->config = SyncServiceConfig();
+	this->sync_modules = std::vector<SyncModule>();
+	this->types = { "local", "cloud" };
+	this->directions = { "one-way", "two-way", "backup" };
+	
 };
 int SyncService::instantiate_service(fs::path path) {
+	if (this->started)
+	{
+		std::cout << "service already started! \n";
+		return 1;
+	}
 	fs::path existing_path = find_existing_service(path);
 	if (existing_path.empty())
 	{
@@ -66,7 +76,27 @@ int SyncService::instantiate_service(fs::path path) {
 		//set service_path to given path if validity check works
 		//currently checkServiceValidity is empty returns 1 each time, implement next commit
 	}
+	this->started = true;
 	return 1;
+};
+int SyncService::close_service() {
+	if (this->started == false)
+	{
+		std::cout << "service not started\n";
+			return 1;
+	}
+	int con_closed = sqlite3_close(this->db);
+	if (con_closed != SQLITE_OK)
+	{
+		std::cout << "an unexpected error occured \n";
+		return 0;
+	}
+	else
+	{
+		std::cout << "service stopped\n";
+		this->started = false;
+		return 1;
+	}
 };
 int SyncService::instantiate_service(){
 	std::cout << "crearing directory at default_path... \n";
@@ -220,8 +250,87 @@ int SyncService::load_sync_modules() {
 			sync_modules_querried = sqlite3_step(ppStmt);
 		}
 		if (sync_modules_querried == SQLITE_DONE)
+		{
+			sqlite3_finalize(ppStmt);
 			return 1;
+		}
 		return 0;
 	}
 	return 0;
+};
+int SyncService::add_sync_module(SyncModule module) {
+	if (module == SyncModule())
+	{
+		std::cout << "module not inserted \n";
+		return 0;
+	}
+	if (!this->started)
+	{
+		std::cout << "Please start the service first, ? or help for more details\n";
+		return 1;
+	}
+	std::ostringstream str;
+	char* err_msg;
+	str << "INSERT INTO SYNCMODULE VALUES ('" << module.name << "', '"
+		<< module.source.string() << "', '"
+		<< module.destination.string() << "', '"
+		<< module.type << "', '"
+		<< module.direction << "');";
+	int sync_module_added = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
+	if (sync_module_added == SQLITE_OK)
+	{
+		std::cout << "Module added succesfully \n";
+		this->sync_modules.push_back(module);
+	}
+	else
+	{
+		std::cout << "Something went wrong inserting module \n" << err_msg << "\n";
+		return 0;
+	}
+	return 1;
+};
+int SyncService::add_sync_module(std::string name, fs::path source, fs::path destination, std::string type, std::string direction)
+{
+	SyncModule module(name, source, destination, type, direction);
+	return add_sync_module(module);
+};
+int SyncService::remove_sync_module(std::string name)
+{
+	if (!this->started)
+	{
+		std::cout << "Please start the service first, ? or help for more details\n";
+		return 1;
+	};
+	std::ostringstream str;
+	char* err_msg;
+	str << "DELETE FROM SYNCMODULE WHERE name == '" << name << "';";
+	int module_deleted = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
+	if (module_deleted == SQLITE_OK)
+	{
+		int sync_module_removed_vector = this->remove_sync_module_vector(name);
+		std::cout << "module deleted succesfully\n";
+		return 1;
+	}
+	else
+		std::cout << "something went wrong removing module\n" << err_msg << "\n";
+	return 0;
+}
+int SyncService::remove_sync_module_vector(std::string name) {
+	auto logical_end_it = std::remove_if(sync_modules.begin(), sync_modules.end(), [&name](const SyncModule& module) {
+		return module.name == name;
+		});
+	sync_modules.erase(logical_end_it, sync_modules.end());
+	return 1;
+};
+int SyncService::print_all_modules() {
+
+	// Print each module
+	std::cout << "-----------------------------------------\n";
+	for (const auto& module : sync_modules) {
+		std::cout << "Name: " << module.name << "\n" << "Source: " << module.source << "\n"
+			<< "Destination: " << module.destination << "\n" << "Type: " << module.type << "\n"
+			<< "Direction: " << module.direction << "\n----------------------------------\n";
+	}
+
+	return 1; // Return value as per your original function signature
 };

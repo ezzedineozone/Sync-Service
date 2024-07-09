@@ -1,7 +1,7 @@
 #ifndef SYNCSERVICEMETADA_H
 #define SYNCSERVICEMETADA_H
 #include <string>
-#include "sqlite3/sqlite3.h"
+#include "dependencies/sqlite3/sqlite3.h"
 class SyncServiceConfig {
 private:
 	std::string version;
