@@ -62,6 +62,22 @@ int SyncService::instantiate_service(fs::path path) {
 		{
 			std::cout << "existing service folder valid \n";
 			paths.getServicePath() = existing_path;
+			fs::path service_relative_path = "sync_service\\sqlite3\\database.db";
+			fs::path combined_paths = path / service_relative_path;
+			int opened = sqlite3_open(reinterpret_cast<const char*>(combined_paths.string().c_str()), &db);
+			if (opened == SQLITE_OK)
+			{
+				std::cout << "connection to database opened\n";
+				int sync_modules_loaded = load_sync_modules();
+				if (sync_modules_loaded == 0)
+				{
+					std::cout << "something went wrong querrying modules from database \n";
+					return 0;
+				}
+				else
+					return 1;
+			}
+
 		}
 		else
 		{
@@ -121,7 +137,7 @@ fs::path SyncService::find_existing_service(fs::path path) {
 };
 int SyncService::check_service_validity(fs::path path) {
 	//returns 0 if service files are valid, 1 otherwise, could maybe be used as a future update checker for the service???
-	return 0;
+	return 1;
 };
 
 
@@ -215,20 +231,20 @@ int SyncService::create_db_schema() {
 	}
 };
 int SyncService::load_sync_modules() {
-	// code below adds a dummy sync module
-	// temp code remove before release
-	const char* add_stmt = "INSERT INTO SYNCMODULE VALUES ('test_module', 'C:\\Users\\Administrator\\Documents\\VS Projects\\Sync Service', 'C:\\test_folder', 'local', 'one-way');";
-	char* add_err_msg;
-	int dummy_inserted = sqlite3_exec(db, add_stmt, nullptr, nullptr, &add_err_msg);
-	if (dummy_inserted == SQLITE_OK)
-	{
-		std::cout << "dummy syncmodule inserted succesfully \n";
-	}
-	else
-	{
-		std::cout << "something went wrong inserting dummy \n" << add_err_msg << "\n";
-		return 0;
-	}
+	//// code below adds a dummy sync module
+	//// temp code remove before release
+	//const char* add_stmt = "INSERT INTO SYNCMODULE VALUES ('test_module', 'C:\\Users\\Administrator\\Documents\\VS Projects\\Sync Service', 'C:\\test_folder', 'local', 'one-way');";
+	//char* add_err_msg;
+	//int dummy_inserted = sqlite3_exec(db, add_stmt, nullptr, nullptr, &add_err_msg);
+	//if (dummy_inserted == SQLITE_OK)
+	//{
+	//	std::cout << "dummy syncmodule inserted succesfully \n";
+	//}
+	//else
+	//{
+	//	std::cout << "something went wrong inserting dummy \n" << add_err_msg << "\n";
+	//	return 0;
+	//}
 
 
 
