@@ -37,7 +37,7 @@ int checkArgsValidity(std::vector<std::string> args, std::string command)
 	{
 		if (args.size() != 6)
 		{
-			std::cout << "Number of arguments too small, type ? or help for more details.\n";
+			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
 			return 0;
 		}
 		else if (std::find(obj->types.begin(), obj->types.end(), args.at(4)) == obj->types.end())
@@ -51,6 +51,15 @@ int checkArgsValidity(std::vector<std::string> args, std::string command)
 			return 0;
 		}
 		return 1;
+	}
+	if (command == "remove")
+	{
+		if (args.size() != 2)
+		{
+			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
+			return 0;
+		}
+
 	}
 };
 std::vector<std::string> parseArguments(std::string msg) {
@@ -114,6 +123,13 @@ int commandHandler(std::string msg)
 	else if (command == "list")
 	{
 		return obj->print_all_modules();
+	}
+	else if (command == "remove")
+	{
+		int valid = checkArgsValidity(args, command);
+		if (!valid)
+			return 1;
+		int module_removed = obj->remove_sync_module(args.at(1));
 	}
 	else
 	{

@@ -356,6 +356,5 @@ int SyncService::print_all_modules() {
 			<< "Destination: " << module.destination << "\n" << "Type: " << module.type << "\n"
 			<< "Direction: " << module.direction << "\n----------------------------------\n";
 	}
-
 	return 1; // Return value as per your original function signature
 };
