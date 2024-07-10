@@ -1,6 +1,6 @@
 Debug/
 Release/
 x64/
-Sync*Service/x64
-Sync*Service/dependencies/slite3/sqlite3.h
-Sync*Service/dependencie/ssqlite3/sqlite3.c
+"Sync Service/x64"
+"Sync Service/dependencies/slite3/sqlite3.h"
+"Sync*Service/dependencie/ssqlite3/sqlite3.c"
