@@ -3,5 +3,6 @@ Release/
 x64/
 x64/Debug/
 x64/Release/
+Sync Service/x64/debug/
 Sync Service/sqlite3/sqlite3.h
 Sync Service/sqlite3/sqlite3.c
