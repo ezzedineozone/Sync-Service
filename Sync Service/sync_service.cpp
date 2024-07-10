@@ -75,7 +75,10 @@ int SyncService::instantiate_service(fs::path path) {
 					return 0;
 				}
 				else
+				{
+					this->started = true;
 					return 1;
+				}
 			}
 
 		}
@@ -339,6 +342,12 @@ int SyncService::remove_sync_module_vector(std::string name) {
 	return 1;
 };
 int SyncService::print_all_modules() {
+	if (!this->started)
+	{
+		std::cout << "Please start the service first, ? or help for more details\n";
+		return 1;
+	}
+
 
 	// Print each module
 	std::cout << "-----------------------------------------\n";
