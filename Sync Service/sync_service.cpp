@@ -281,7 +281,7 @@ int SyncService::add_sync_module(SyncModule module) {
 	if (module == SyncModule())
 	{
 		std::cout << "module not inserted \n";
-		return 0;
+		return 1;
 	}
 	if (!this->started)
 	{
@@ -326,6 +326,12 @@ int SyncService::remove_sync_module(std::string name)
 	int module_deleted = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
 	if (module_deleted == SQLITE_OK)
 	{
+		int changes = sqlite3_changes(db);
+		if (changes == 0)
+		{
+			std::cout << "Module not found \n";
+			return 1;
+		}
 		int sync_module_removed_vector = this->remove_sync_module_vector(name);
 		std::cout << "module deleted succesfully\n";
 		return 1;
