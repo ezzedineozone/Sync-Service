@@ -139,16 +139,18 @@
     <ClCompile Include="cmd.cpp" />
     <ClCompile Include="sync_module.cpp" />
     <ClCompile Include="sync_service.cpp" />
+    <ClCompile Include="sync_service_handler.cpp" />
     <ClCompile Include="stored_paths.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sync_service_config.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmd.h" />
+    <ClInclude Include="sync_service.h" />
     <ClInclude Include="sqlite3\sqlite3.h" />
     <ClInclude Include="stored_paths.h" />
     <ClInclude Include="sync_module.h" />
-    <ClInclude Include="sync_service.h" />
+    <ClInclude Include="sync_service_handler.h" />
     <ClInclude Include="sync_service_config.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

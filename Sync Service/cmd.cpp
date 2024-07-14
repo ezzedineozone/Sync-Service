@@ -1,6 +1,6 @@
 #include "cmd.h"
 #include "sync_service.h"
-Cmd::Cmd(SyncService* obj) {
+Cmd::Cmd(ServiceHandler* obj) {
 	this->obj = obj;
 };
 std::string Cmd::get_input() {
