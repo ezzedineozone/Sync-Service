@@ -1,6 +1,6 @@
 #include "cmd.h"
 #include "sync_service.h"
-Cmd::Cmd(ServiceHandler* obj) {
+Cmd::Cmd(SyncService* obj) {
 	this->obj = obj;
 };
 std::string Cmd::get_input() {
@@ -36,12 +36,12 @@ int Cmd::check_args_validity(std::vector<std::string> args, std::string command)
 			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
 			return 0;
 		}
-		else if (std::find(obj->types.begin(), obj->types.end(), args.at(4)) == obj->types.end())
+		else if (std::find(obj->get_handler()->types.begin(), obj->get_handler()->types.end(), args.at(4)) == obj->get_handler()->types.end())
 		{
 			std::cout << "Incorrect sync type, valid: local, cloud. \n";
 			return 0;
 		}
-		else if (std::find(obj->directions.begin(), obj->directions.end(), args.at(5)) == obj->directions.end())
+		else if (std::find(obj->get_handler()->directions.begin(), obj->get_handler()->directions.end(), args.at(5)) == obj->get_handler()->directions.end())
 		{
 			std::cout << "Incorrect sync direction, valid: one-way, two-way, backup. \n";
 			return 0;
@@ -103,15 +103,19 @@ int Cmd::command_handler(std::string msg)
 		return obj->instantiate_service();
 	else if (command == "stop")
 	{
-		return obj->close_service();
+		return obj->instantiate_service();
 	}
 	else if (command == "add")
 	{
 		int valid = check_args_validity(args, command);
 		if (!valid)
 			return 1;
-		int module_added = obj->add_sync_module(args.at(1), fs::path(args.at(2)), fs::path(args.at(3)), args.at(4), args.at(5));
+		int module_added = obj->get_handler()->add_sync_module(args.at(1), fs::path(args.at(2)), fs::path(args.at(3)), args.at(4), args.at(5));
 		return module_added;
+	}
+	else if (command == "config")
+	{
+		return obj->get_config()->print_config();
 	}
 	else if (command == "?" || command == "help")
 	{
@@ -119,14 +123,14 @@ int Cmd::command_handler(std::string msg)
 	}
 	else if (command == "list")
 	{
-		return obj->print_all_modules();
+		return obj->get_handler()->print_all_modules();
 	}
 	else if (command == "remove")
 	{
 		int valid = check_args_validity(args, command);
 		if (!valid)
 			return 1;
-		int module_removed = obj->remove_sync_module(args.at(1));
+		int module_removed = obj->get_handler()->remove_sync_module(args.at(1));
 	}
 	else
 	{

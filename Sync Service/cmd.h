@@ -10,9 +10,9 @@ class Cmd {
 public:
 	int print_help_functions();
 	int request_command();
-	Cmd(ServiceHandler* obj);
+	Cmd(SyncService* obj);
 private:
-	ServiceHandler* obj;
+	SyncService* obj;
 	std::string get_input();
 	int check_args_validity(std::vector<std::string> args, std::string command);
 	std::vector<std::string> parse_arguments(std::string msg);
