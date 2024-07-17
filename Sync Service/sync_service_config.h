@@ -5,19 +5,19 @@
 #include "stored_paths.h"
 #include "json.hpp"
 #include <fstream>
+#include <filesystem>
 namespace fs = std::filesystem;
 class ServiceConfig {
 private:
 	std::string version;
 	std::string general_frequency; // format Number,day/month/year/hour
 	std::string log_dir;
+	nlohmann::json j;
 	bool log_enabled;
 	int create_files;
 
 	int from_json(const nlohmann::json& j, ServiceConfig& config);
 	int to_json(nlohmann::json& j, const ServiceConfig& config);
-	int save_json(const nlohmann::json& j);
-	int load_json(nlohmann::json& j);
 
 public:
 	ServiceConfig(); 
@@ -34,5 +34,6 @@ public:
 	bool get_log_enabled();
 	void set_log_enabled(bool val);
 	int print_config();
+	int json_handler();
 };
 #endif

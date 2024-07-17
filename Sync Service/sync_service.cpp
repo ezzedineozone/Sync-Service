@@ -14,6 +14,10 @@ int SyncService::check_service_validity(fs::path path) {
 	return 1;
 };
 int SyncService::instantiate_service() {
+	std::cout << "loading config";
+	int config_loaded = this->config->json_handler();
+	if (!config_loaded)
+		std::cout << "something went wrong loading config";
 	fs::path path = this->config->paths.servicePath();
 	if (this->started)
 	{

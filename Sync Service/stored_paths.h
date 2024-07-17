@@ -15,6 +15,7 @@ public:
 		fs::path roaming_path = fs::path(std::wstring(roaming_path_pwstr));
 		this->service_path = roaming_path / "sync_service";
 		this->sqlite3_path = this->servicePath() / "sqlite3" / "database.db";
+		this->config_path = this->servicePath() / "config.json";
 	};
 	StoredPaths(fs::path path)
 	{

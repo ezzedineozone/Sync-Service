@@ -37,5 +37,6 @@ private:
 	int check_service_validity(fs::path path);
 	int create_db_schema();
 	int remove_sync_module_vector(std::string name);
+	SyncModule get_sync_module(std::string name);
 };
 #endif // !SYNCSERVICE_H

@@ -120,7 +120,11 @@ int ServiceHandler::remove_sync_module(std::string name)
 	else
 		std::cout << "something went wrong removing module\n" << err_msg << "\n";
 	return 0;
-}
+};
+int ServiceHandler::remove_sync_module(SyncModule module)
+{
+	return remove_sync_module(module.name);
+};
 int ServiceHandler::remove_sync_module_vector(std::string name) {
 	auto logical_end_it = std::remove_if(sync_modules.begin(), sync_modules.end(), [&name](const SyncModule& module) {
 		return module.name == name;
