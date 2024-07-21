@@ -39,6 +39,9 @@
     <ClCompile Include="sync_service.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sync_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sync_service_handler.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sync_service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sync_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

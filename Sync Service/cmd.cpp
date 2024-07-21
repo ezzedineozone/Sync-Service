@@ -132,6 +132,10 @@ int Cmd::command_handler(std::string msg)
 			return 1;
 		int module_removed = obj->get_handler()->remove_sync_module(args.at(1));
 	}
+	else if (command == "reset")
+	{
+		return obj->reset_service();
+	}
 	else
 	{
 		std::cout << "invalid command\n";

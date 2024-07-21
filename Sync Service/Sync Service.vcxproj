@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="dependencies\sqlite3\sqlite3.c" />
     <ClCompile Include="cmd.cpp" />
+    <ClCompile Include="sync_info.cpp" />
     <ClCompile Include="sync_module.cpp" />
     <ClCompile Include="sync_service.cpp" />
     <ClCompile Include="sync_service_handler.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmd.h" />
+    <ClInclude Include="sync_info.h" />
     <ClInclude Include="sync_service.h" />
     <ClInclude Include="sqlite3\sqlite3.h" />
     <ClInclude Include="stored_paths.h" />

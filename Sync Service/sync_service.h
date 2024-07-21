@@ -23,6 +23,8 @@ public:
 	ServiceConfig* get_config();
 	int instantiate_service();
 	int print_config();
+	int reset_service(); // this function will delete all service files and create them again
+	int startup_routine();
 
 private:
 	ServiceHandler* handler;

@@ -1,13 +1,14 @@
 #include "sync_module.h"
 #include <iostream>
-SyncModule::SyncModule() {
+#include "sync_info.h"
+SyncModule::SyncModule() : info("") {
     this->set_destination(fs::path());
     this->set_source(fs::path());
     this->set_type(std::string());
     this->set_direction(std::string());
 }
-
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction) {
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction) : SyncModule(name, source, destination, type, direction, "" ){};
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency) : info(name, frequency) {
 
     if(fs::exists(source))
         if (fs::exists(destination))
@@ -29,7 +30,9 @@ SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, 
     }
 
 }
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, SyncInfo info) : info (info), name(name), source(source), destination(destination), type(type), direction(direction) {
 
+};
 fs::path SyncModule::get_source() {
     return source;
 }

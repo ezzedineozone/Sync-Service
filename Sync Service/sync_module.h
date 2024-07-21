@@ -1,6 +1,7 @@
 #ifndef SYNCMODULE_H
 #define SYNCMODULE_H
 #include <filesystem>
+#include "sync_info.h"
 namespace fs = std::filesystem;
 class SyncModule {
 public:
@@ -11,9 +12,14 @@ public:
 	std::string name;
 
 
+	SyncInfo info;
+
+
 
 	SyncModule();
 	SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
+	SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency);
+	SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, SyncInfo info);
 	fs::path get_source();
 	fs::path get_destination();
 	std::string get_name();

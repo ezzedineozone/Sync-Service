@@ -6,6 +6,7 @@
 #include <cstring>
 #include <sstream>
 #include "sqlite3.h"
+#include <chrono>
 namespace fs = std::filesystem;
 
 ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started) : config(config) , db(db), started(started) {
@@ -13,23 +14,13 @@ ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& starte
 	this->types = { "local", "cloud" };
 	this->directions = { "one-way", "two-way", "backup" };
 };
+ServiceHandler::~ServiceHandler() {
+	if (config) {
+		delete config;
+		config = nullptr;
+	}
+};
 int ServiceHandler::load_sync_modules() {
-	//// code below adds a dummy sync module
-	//// temp code remove before release
-	//const char* add_stmt = "INSERT INTO SYNCMODULE VALUES ('test_module', 'C:\\Users\\Administrator\\Documents\\VS Projects\\Sync Service', 'C:\\test_folder', 'local', 'one-way');";
-	//char* add_err_msg;
-	//int dummy_inserted = sqlite3_exec(db, add_stmt, nullptr, nullptr, &add_err_msg);
-	//if (dummy_inserted == SQLITE_OK)
-	//{
-	//	std::cout << "dummy syncmodule inserted succesfully \n";
-	//}
-	//else
-	//{
-	//	std::cout << "something went wrong inserting dummy \n" << add_err_msg << "\n";
-	//	return 0;
-	//}
-
-
 
 	const char* sql_stmt = "SELECT * FROM SYNCMODULE;";
 	sqlite3_stmt* ppStmt;
@@ -45,7 +36,23 @@ int ServiceHandler::load_sync_modules() {
 			fs::path destination = fs::path(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 2)));
 			std::string type = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 3)));
 			std::string direction = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmt, 4)));
-			this->sync_modules.push_back(SyncModule(name, source, destination, type, direction));
+			SyncInfo* info;
+			sqlite3_stmt* ppStmtInfo;
+			int sync_info_querry = sqlite3_prepare_v2(db, (std::string("SELECT last_sync_date_unix, frequency, dirty from syncinfo where name = '") + name + std::string("';")).c_str(), -1, &ppStmtInfo, nullptr);
+			if (sync_info_querry == SQLITE_OK)
+			{
+				std::cout << "sync info querried succesfully";
+				int sync_info_querried = sqlite3_step(ppStmtInfo);
+				int unix_time = sqlite3_column_int(ppStmtInfo, 0);
+				std::string frequency = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmtInfo, 1)));
+				int dirty = sqlite3_column_int(ppStmtInfo, 2);
+				info = new SyncInfo(name, unix_time, frequency, dirty);
+				this->sync_modules.push_back(SyncModule(name, source, destination, type, direction, *info));
+			}
+			else
+			{
+				std::cout << "something went wrong querrying from syncinfo \n" << sqlite3_errmsg(db);
+			}
 			sync_modules_querried = sqlite3_step(ppStmt);
 		}
 		if (sync_modules_querried == SQLITE_DONE)
@@ -81,6 +88,18 @@ int ServiceHandler::add_sync_module(SyncModule module) {
 	{
 		std::cout << "Module added succesfully \n";
 		this->sync_modules.push_back(module);
+		std::ostringstream sync_info_str;
+		char* sync_info_err;
+		int unix_timestamp = this->get_current_unix_time();
+		sync_info_str << "INSERT INTO SYNCINFO VALUES ('" << module.info.name << "', "
+			<< module.info.get_last_sync_date_unix() << ", '' ," << 0 << ");";
+		int sync_info_added = sqlite3_exec(db, sync_info_str.str().c_str(), nullptr, nullptr, &sync_info_err);
+		if (sync_info_added != SQLITE_OK)
+		{
+			std::cout << "something went wrong adding module\n" << sync_info_err << "\n";
+			this->remove_sync_module(module);
+			return 0;
+		}
 	}
 	else
 	{
@@ -111,10 +130,18 @@ int ServiceHandler::remove_sync_module(std::string name)
 		if (changes == 0)
 		{
 			std::cout << "Module not found \n";
-			return 1;
+			return 0;
 		}
 		int sync_module_removed_vector = this->remove_sync_module_vector(name);
 		std::cout << "module deleted succesfully\n";
+		char* info_err_msg;
+		int info_deleted = sqlite3_exec(db, reinterpret_cast<const char*>((std::string("delete from syncinfo where name == '") + name + std::string("';")).c_str()), nullptr, nullptr, &info_err_msg);
+		changes = sqlite3_changes(db);
+		if (changes == 0)
+		{
+			std::cout << "something went wrong deleting info\n";
+			return 0;
+		}
 		return 1;
 	}
 	else
@@ -149,3 +176,12 @@ int ServiceHandler::print_all_modules() {
 	}
 	return 1; // Return value as per your original function signature
 };
+
+int ServiceHandler::get_current_unix_time() {
+	auto now = std::chrono::system_clock::now();
+	std::time_t unix_timestamp = std::chrono::system_clock::to_time_t(now);
+	int unix_timestamp_int = static_cast<int>(unix_timestamp);
+
+
+	return unix_timestamp_int;
+}
