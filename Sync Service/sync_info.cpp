@@ -1,9 +1,15 @@
 #include "sync_info.h"
-// Constructor
-SyncInfo::SyncInfo(std::string name) : name(name), last_sync_date_unix(this->get_current_unix_time()), frequency(""), dirty(1){}
-SyncInfo::SyncInfo(std::string name, std::string frequency) : name(name), last_sync_date_unix(this->get_current_unix_time()), frequency(frequency), dirty(1) {};
-SyncInfo::SyncInfo(std::string name, int last_sync_unix, std::string frequency, int dirty) : name(name), last_sync_date_unix(last_sync_unix), frequency(frequency), dirty(dirty) {};
-// Getters
+
+
+//SyncInfo(std::string name);
+//SyncInfo(std::string name, std::string frequency);
+//SyncInfo(std::string name, int last_unix_sync_date, std::string frequency, int dirty);
+
+SyncInfo::SyncInfo(std::string name, int last_sync_date, std::string frequency, int dirty) : name(name), last_sync_date_unix(last_sync_date), frequency(frequency), dirty(dirty) {};
+SyncInfo::SyncInfo(std::string name, std::string frequency) : SyncInfo(name, get_current_unix_time(), std::string(""), 1) {};
+SyncInfo::SyncInfo(std::string name) : SyncInfo(name, std::string("")) {};
+
+
 int SyncInfo::get_last_sync_date_unix() const {
     return last_sync_date_unix;
 }

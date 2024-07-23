@@ -1,38 +1,32 @@
 #include "sync_module.h"
 #include <iostream>
 #include "sync_info.h"
-SyncModule::SyncModule() : info("") {
-    this->set_destination(fs::path());
-    this->set_source(fs::path());
-    this->set_type(std::string());
-    this->set_direction(std::string());
+//SyncModule();
+//SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
+//SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency);
+//SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info);
+
+
+SyncModule::SyncModule() : info (SyncInfo(name)) {
+    this->name = "";
+    this->source = fs::path();
+    this->destination = fs::path();
+    this->type = "";
+    this->direction = "";
 }
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction) : SyncModule(name, source, destination, type, direction, "" ){};
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency) : info(name, frequency) {
 
-    if(fs::exists(source))
-        if (fs::exists(destination))
-        {
-            this->set_name(name);
-            this->set_destination(destination);
-            this->set_source(source);
-            this->set_type(type);
-            this->set_direction(direction);
-        }
-        else
-        {
-            std::cout << "destination entered isn't valid\n";
-            *this = SyncModule();
-        }
-    else {
-        std::cout << "source entered isn't valid\n";
-        *this = SyncModule();
-    }
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info) : name(name), source(source), destination(destination), type(type), direction(direction), info(info) {};
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency) : SyncModule(name, source, destination, type, direction, SyncInfo(name, frequency)) {};
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction) : SyncModule(name, source, destination, type, direction, SyncInfo(name)) {};
 
-}
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, SyncInfo info) : info (info), name(name), source(source), destination(destination), type(type), direction(direction) {
+SyncModule::SyncModule(const SyncModule& module) : SyncModule(module.name, module.source, module.destination, module.type, module.direction, module.info) {};
 
-};
+
+
+
+
+
+
 fs::path SyncModule::get_source() {
     return source;
 }

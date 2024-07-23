@@ -121,7 +121,6 @@ int SyncService::close_service() {
 		return 1;
 	}
 };
-
 int SyncService::create_files()
 {
 	std::cout << "begin file creation... \n";

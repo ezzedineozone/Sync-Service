@@ -19,6 +19,7 @@ public:
 	SyncService();
 	SyncService(fs::path path);
 	SyncService(std::string path);
+	~SyncService();
 	ServiceHandler* get_handler();
 	ServiceConfig* get_config();
 	int instantiate_service();

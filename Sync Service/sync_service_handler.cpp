@@ -10,7 +10,7 @@
 namespace fs = std::filesystem;
 
 ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started) : config(config) , db(db), started(started) {
-	this->sync_modules = std::vector<SyncModule>();
+	this->sync_modules = std::vector<SyncModule*>();
 	this->types = { "local", "cloud" };
 	this->directions = { "one-way", "two-way", "backup" };
 };
@@ -19,6 +19,10 @@ ServiceHandler::~ServiceHandler() {
 		delete config;
 		config = nullptr;
 	}
+	for (auto module : sync_modules) {
+		delete module;
+	}
+	sync_modules.clear();
 };
 int ServiceHandler::load_sync_modules() {
 
@@ -47,7 +51,7 @@ int ServiceHandler::load_sync_modules() {
 				std::string frequency = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmtInfo, 1)));
 				int dirty = sqlite3_column_int(ppStmtInfo, 2);
 				info = new SyncInfo(name, unix_time, frequency, dirty);
-				this->sync_modules.push_back(SyncModule(name, source, destination, type, direction, *info));
+				this->sync_modules.push_back(new SyncModule(name, source, destination, type, direction, *info));
 			}
 			else
 			{
@@ -87,7 +91,7 @@ int ServiceHandler::add_sync_module(SyncModule module) {
 	if (sync_module_added == SQLITE_OK)
 	{
 		std::cout << "Module added succesfully \n";
-		this->sync_modules.push_back(module);
+		this->sync_modules.push_back(&module);
 		std::ostringstream sync_info_str;
 		char* sync_info_err;
 		int unix_timestamp = this->get_current_unix_time();
@@ -153,10 +157,17 @@ int ServiceHandler::remove_sync_module(SyncModule module)
 	return remove_sync_module(module.name);
 };
 int ServiceHandler::remove_sync_module_vector(std::string name) {
-	auto logical_end_it = std::remove_if(sync_modules.begin(), sync_modules.end(), [&name](const SyncModule& module) {
-		return module.name == name;
-		});
-	sync_modules.erase(logical_end_it, sync_modules.end());
+	auto iterator = this->sync_modules.begin();
+	while (iterator != this->sync_modules.end())
+	{
+		SyncModule* module = *iterator;
+		if (module->name == name)
+		{
+			delete module;
+			iterator = this->sync_modules.erase(iterator);
+		}
+		iterator++;
+	}
 	return 1;
 };
 int ServiceHandler::print_all_modules() {
@@ -170,13 +181,28 @@ int ServiceHandler::print_all_modules() {
 	// Print each module
 	std::cout << "-----------------------------------------\n";
 	for (const auto& module : sync_modules) {
-		std::cout << "Name: " << module.name << "\n" << "Source: " << module.source << "\n"
-			<< "Destination: " << module.destination << "\n" << "Type: " << module.type << "\n"
-			<< "Direction: " << module.direction << "\n----------------------------------\n";
+		std::cout << "Name: " << module->name << "\n" << "Source: " << module->source << "\n"
+			<< "Destination: " << module->destination << "\n" << "Type: " << module->type << "\n"
+			<< "Direction: " << module->direction << "\n----------------------------------\n";
 	}
 	return 1; // Return value as per your original function signature
 };
-
+int ServiceHandler::update_sync_module(std::string name, const SyncModule& module) {
+	SyncModule* old_module = get_module(name);
+	SyncModule* new_module = new SyncModule(module);
+	remove_sync_module(old_module->name);
+	add_sync_module(*new_module);
+	this->sync_modules.push_back(new_module);
+	return 1;
+};
+SyncModule* ServiceHandler::get_module(std::string name) {
+	for (auto module : sync_modules)
+	{
+		if (module->name == name)
+			return module;
+	}
+	return new SyncModule();
+};
 int ServiceHandler::get_current_unix_time() {
 	auto now = std::chrono::system_clock::now();
 	std::time_t unix_timestamp = std::chrono::system_clock::to_time_t(now);

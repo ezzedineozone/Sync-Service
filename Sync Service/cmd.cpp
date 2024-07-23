@@ -1,5 +1,7 @@
 #include "cmd.h"
 #include "sync_service.h"
+#include <filesystem>
+namespace fs = std::filesystem;
 Cmd::Cmd(SyncService* obj) {
 	this->obj = obj;
 };
@@ -123,6 +125,7 @@ int Cmd::command_handler(std::string msg)
 	}
 	else if (command == "list")
 	{
+		obj->get_handler()->update_sync_module("module3", SyncModule(std::string("hi"), fs::path("C:\\test_folder"), fs::path("C:\\test_folder"), std::string("local"), std::string("one-way")));
 		return obj->get_handler()->print_all_modules();
 	}
 	else if (command == "remove")

@@ -4,10 +4,10 @@
 #include <chrono>
 class SyncInfo {
 public:
-	SyncInfo(std::string name);
-    SyncInfo(std::string name, std::string frequency);
-    SyncInfo(std::string name, int last_sync_unix, std::string frequency, int dirty);
 
+    SyncInfo(std::string name);
+    SyncInfo(std::string name, std::string frequency);
+    SyncInfo(std::string name, int last_unix_sync_date, std::string frequency, int dirty);
 
     std::string name;
     int get_last_sync_date_unix() const;

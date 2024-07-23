@@ -16,22 +16,23 @@ class ServiceHandler {
 public:
 	ServiceConfig* config;
 	sqlite3*& db;
-	std::vector<SyncModule> sync_modules;
+	std::vector<SyncModule*> sync_modules;
 	std::vector<std::string> types;
 	std::vector<std::string> directions;
 
 	bool& started;
 
 	ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started);
-
+	~ServiceHandler();
 
 	int add_sync_module(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
 	int add_sync_module(SyncModule module);
 	int print_all_modules();
 	int remove_sync_module(SyncModule module);
 	int remove_sync_module(std::string name);
-	int update_sync_module(SyncModule module_old, SyncModule module_new);
 	int load_sync_modules();
+	int update_sync_module(std::string name, const SyncModule& module);
+	SyncModule* get_module(std::string name);
 private:
 	fs::path find_existing_service(fs::path path);
 	int check_service_validity(fs::path path);
@@ -40,5 +41,6 @@ private:
 	int get_current_unix_time();
 	SyncModule get_sync_module(std::string name);
 	SyncInfo querySyncInfo(std::string name);
+
 };
 #endif // !SYNCSERVICE_H
