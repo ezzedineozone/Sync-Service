@@ -31,6 +31,7 @@ int ServiceHandler::load_sync_modules() {
 	int sync_modules_querry = sqlite3_prepare_v2(db, sql_stmt, -1, &ppStmt, nullptr);
 	if (sync_modules_querry == SQLITE_OK)
 	{
+
 		std::cout << "sync modules querried succesfully\n";
 		int sync_modules_querried = sqlite3_step(ppStmt);
 		while (sync_modules_querried == SQLITE_ROW)
@@ -45,7 +46,6 @@ int ServiceHandler::load_sync_modules() {
 			int sync_info_querry = sqlite3_prepare_v2(db, (std::string("SELECT last_sync_date_unix, frequency, dirty from syncinfo where name = '") + name + std::string("';")).c_str(), -1, &ppStmtInfo, nullptr);
 			if (sync_info_querry == SQLITE_OK)
 			{
-				std::cout << "sync info querried succesfully";
 				int sync_info_querried = sqlite3_step(ppStmtInfo);
 				int unix_time = sqlite3_column_int(ppStmtInfo, 0);
 				std::string frequency = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppStmtInfo, 1)));
@@ -69,8 +69,8 @@ int ServiceHandler::load_sync_modules() {
 	std::cout << "Error preparing SQL statement: " << sqlite3_errmsg(db) << "\n";
 	return 0;
 };
-int ServiceHandler::add_sync_module(SyncModule module) {
-	if (module == SyncModule())
+int ServiceHandler::add_sync_module(SyncModule* module) {
+	if (*module == * new SyncModule())
 	{
 		std::cout << "module not inserted \n";
 		return 1;
@@ -82,27 +82,30 @@ int ServiceHandler::add_sync_module(SyncModule module) {
 	}
 	std::ostringstream str;
 	char* err_msg;
-	str << "INSERT INTO SYNCMODULE VALUES ('" << module.name << "', '"
-		<< module.source.string() << "', '"
-		<< module.destination.string() << "', '"
-		<< module.type << "', '"
-		<< module.direction << "');";
+	str << "INSERT INTO SYNCMODULE VALUES ('" << module->name << "', '"
+		<< module->source.string() << "', '"
+		<< module->destination.string() << "', '"
+		<< module->type << "', '"
+		<< module->direction << "');";
 	int sync_module_added = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
 	if (sync_module_added == SQLITE_OK)
 	{
 		std::cout << "Module added succesfully \n";
-		this->sync_modules.push_back(&module);
 		std::ostringstream sync_info_str;
 		char* sync_info_err;
 		int unix_timestamp = this->get_current_unix_time();
-		sync_info_str << "INSERT INTO SYNCINFO VALUES ('" << module.info.name << "', "
-			<< module.info.get_last_sync_date_unix() << ", '' ," << 0 << ");";
+		sync_info_str << "INSERT INTO SYNCINFO VALUES ('" << module->info.name << "', "
+			<< module->info.get_last_sync_date_unix() << ", '' ," << 0 << ");";
 		int sync_info_added = sqlite3_exec(db, sync_info_str.str().c_str(), nullptr, nullptr, &sync_info_err);
 		if (sync_info_added != SQLITE_OK)
 		{
 			std::cout << "something went wrong adding module\n" << sync_info_err << "\n";
-			this->remove_sync_module(module);
+			this->remove_sync_module(*module);
 			return 0;
+		}
+		else
+		{
+			this->sync_modules.push_back(module);
 		}
 	}
 	else
@@ -114,7 +117,7 @@ int ServiceHandler::add_sync_module(SyncModule module) {
 };
 int ServiceHandler::add_sync_module(std::string name, fs::path source, fs::path destination, std::string type, std::string direction)
 {
-	SyncModule module(name, source, destination, type, direction);
+	SyncModule* module = new SyncModule(name, source, destination, type, direction);
 	return add_sync_module(module);
 };
 int ServiceHandler::remove_sync_module(std::string name)
@@ -166,11 +169,13 @@ int ServiceHandler::remove_sync_module_vector(std::string name) {
 			delete module;
 			iterator = this->sync_modules.erase(iterator);
 		}
-		iterator++;
+		else 
+			iterator++;
 	}
 	return 1;
 };
 int ServiceHandler::print_all_modules() {
+	
 	if (!this->started)
 	{
 		std::cout << "Please start the service first, ? or help for more details\n";
@@ -178,21 +183,18 @@ int ServiceHandler::print_all_modules() {
 	}
 
 
-	// Print each module
 	std::cout << "-----------------------------------------\n";
-	for (const auto& module : sync_modules) {
+	for (const auto& module : this->sync_modules) {
 		std::cout << "Name: " << module->name << "\n" << "Source: " << module->source << "\n"
 			<< "Destination: " << module->destination << "\n" << "Type: " << module->type << "\n"
 			<< "Direction: " << module->direction << "\n----------------------------------\n";
 	}
-	return 1; // Return value as per your original function signature
+	return 1;
 };
-int ServiceHandler::update_sync_module(std::string name, const SyncModule& module) {
+int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 	SyncModule* old_module = get_module(name);
-	SyncModule* new_module = new SyncModule(module);
 	remove_sync_module(old_module->name);
-	add_sync_module(*new_module);
-	this->sync_modules.push_back(new_module);
+	add_sync_module(module);
 	return 1;
 };
 SyncModule* ServiceHandler::get_module(std::string name) {

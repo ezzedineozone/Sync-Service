@@ -59,6 +59,14 @@ int Cmd::check_args_validity(std::vector<std::string> args, std::string command)
 		}
 
 	}
+	if (command == "update")
+	{
+		if (args.size() != 7)
+		{
+			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
+			return 0;
+		}
+	}
 };
 std::vector<std::string> Cmd::parse_arguments(std::string msg) {
 	std::istringstream stream(msg);
@@ -125,7 +133,6 @@ int Cmd::command_handler(std::string msg)
 	}
 	else if (command == "list")
 	{
-		obj->get_handler()->update_sync_module("module3", SyncModule(std::string("hi"), fs::path("C:\\test_folder"), fs::path("C:\\test_folder"), std::string("local"), std::string("one-way")));
 		return obj->get_handler()->print_all_modules();
 	}
 	else if (command == "remove")
@@ -135,8 +142,17 @@ int Cmd::command_handler(std::string msg)
 			return 1;
 		int module_removed = obj->get_handler()->remove_sync_module(args.at(1));
 	}
+	else if (command == "update")
+	{
+		int valid = check_args_validity(args, command);
+		auto* new_module = new SyncModule(args.at(2), fs::path(args.at(3)), fs::path(args.at(4)), args.at(5), args.at(6));
+		if (valid)
+			return obj->get_handler()->update_sync_module(args.at(1), new_module);
+		return 0;
+	}
 	else if (command == "reset")
 	{
+		
 		return obj->reset_service();
 	}
 	else

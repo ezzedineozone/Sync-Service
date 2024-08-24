@@ -15,7 +15,25 @@ SyncModule::SyncModule() : info (SyncInfo(name)) {
     this->direction = "";
 }
 
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info) : name(name), source(source), destination(destination), type(type), direction(direction), info(info) {};
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info) : SyncModule() {
+    if (fs::exists(source)) {
+        if (fs::exists(destination))
+        {
+            this->name = name;
+            this->source = source;
+            this->destination = destination;
+            this->type = type;
+            this->direction = direction;
+            this->info = info;
+        }
+        else {
+            std::cout << "Destination is invalid\n";
+        }
+    }
+    else {
+        std::cout << "source is invalid\n";
+    }
+};
 SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency) : SyncModule(name, source, destination, type, direction, SyncInfo(name, frequency)) {};
 SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction) : SyncModule(name, source, destination, type, direction, SyncInfo(name)) {};
 

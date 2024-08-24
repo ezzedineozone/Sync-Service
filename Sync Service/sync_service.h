@@ -11,7 +11,7 @@
  * This class manages all operations related to the service boot process, including both initial and subsequent boots.
  * additionally, it handles service termination.
  *
- * for logic related to service interactions during runtime and its specific functionalities, refer to service_handler.h
+ * for logic related to service interactions during runtime and its specific functionalities, go to service_handler.h
  */
 namespace fs = std::filesystem;
 class SyncService {

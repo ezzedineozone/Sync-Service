@@ -10,22 +10,17 @@ SyncService::SyncService(fs::path path) {
 	this->started = false;
 };
 SyncService::~SyncService() {
-	// Destructor implementation
 	if (db) {
-		sqlite3_close(db); // Close the database connection if it is open
-		db = nullptr; // Set to nullptr to avoid dangling pointer issues
+		sqlite3_close(db);
+		db = nullptr; 
 	}
-
-	// Delete the handler if it was allocated dynamically
 	if (handler) {
 		delete handler;
-		handler = nullptr; // Set to nullptr to avoid dangling pointer issues
+		handler = nullptr;
 	}
-
-	// Delete the config if it was allocated dynamically
 	if (config) {
 		delete config;
-		config = nullptr; // Set to nullptr to avoid dangling pointer issues
+		config = nullptr; 
 	}
 }
 int SyncService::check_service_validity(fs::path path) {
@@ -51,6 +46,7 @@ int SyncService::instantiate_service() {
 		}
 		if (_stricmp(user_answer.c_str(), "n") == 0)
 			return 0;
+		this->config->json_handler();
 		bool dir_created = fs::create_directory(this->config->paths.servicePath());
 		if (dir_created)
 		{
@@ -64,6 +60,7 @@ int SyncService::instantiate_service() {
 	}
 	else
 	{
+
 		std::cout << "existing path non empty \n";
 		std::cout << "checking validity for existing path... \n";
 		int valid = this->check_service_validity(this->config->paths.servicePath());
@@ -194,7 +191,7 @@ int SyncService::create_db_schema() {
 	}
 	else
 	{
-		//code below is for the SYNCMODULE table
+		//code below is for the SYNCINnfo table
 		const char* sync_info_statement = "CREATE TABLE SYNCINFO(name TEXT PRIMARY KEY,last_sync_date_unix INT, frequency varchar(20), dirty INT,FOREIGN KEY(name) REFERENCES SYNCMODULE(name));";
 		char* sync_info_error_msg;
 		int sync_module_table_created = sqlite3_exec(db, sync_info_statement, nullptr, nullptr, &sync_info_error_msg);
@@ -221,10 +218,13 @@ int SyncService::print_config() {
 };
 int SyncService::reset_service() {
 	if (this->started)
-		if (sqlite3_close(this->db))
+	{
+		auto connection_closed = sqlite3_close(this->db);
+		if (sqlite3_close(this->db) == SQLITE_OK)
 			return 0;
 		else
 			this->started = false;
+	}
 	if (!fs::directory_entry(this->config->paths.servicePath()).exists())
 	{
 		std::cout << "succesful\n";
