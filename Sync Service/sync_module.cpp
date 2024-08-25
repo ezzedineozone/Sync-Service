@@ -1,6 +1,4 @@
 #include "sync_module.h"
-#include <iostream>
-#include "sync_info.h"
 //SyncModule();
 //SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
 //SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency);

@@ -1,12 +1,19 @@
 #ifndef SYNCSERVICE_H
 #define SYNCSERVICE_H
+#include "dependencies/asio/asio.hpp"
 #include "sync_service_handler.h"
 #include "sync_service_config.h"
 #include "stored_paths.h"
 #include <string>
 #include <filesystem>
 #include <iostream>
-#include "sqlite3.h"
+#include <ShlObj_core.h>
+#include <stdlib.h>
+#include <cstring>
+#include <sstream>
+#include <chrono>
+#include "dependencies/sqlite3/sqlite3.h"
+#include "dependencies/json/json.hpp"
 /*
  * This class manages all operations related to the service boot process, including both initial and subsequent boots.
  * additionally, it handles service termination.

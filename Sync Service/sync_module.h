@@ -2,6 +2,7 @@
 #define SYNCMODULE_H
 #include <filesystem>
 #include "sync_info.h"
+#include <iostream>
 namespace fs = std::filesystem;
 class SyncModule {
 public:

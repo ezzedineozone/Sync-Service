@@ -3,9 +3,10 @@
 #include <string>
 #include <filesystem>
 #include "stored_paths.h"
-#include "json.hpp"
+#include "dependencies/json/json.hpp"
 #include <fstream>
 #include <filesystem>
+#include <iostream>
 namespace fs = std::filesystem;
 class ServiceConfig {
 private:

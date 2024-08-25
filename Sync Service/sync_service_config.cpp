@@ -1,5 +1,4 @@
 #include "sync_service_config.h"
-#include <iostream>
 ServiceConfig::ServiceConfig() {
 	this->general_frequency = "1/day";
 	this->log_dir = "";

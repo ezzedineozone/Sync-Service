@@ -28,19 +28,13 @@ public:
 	int add_sync_module(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
 	int add_sync_module(SyncModule* module);
 	int print_all_modules();
-	int remove_sync_module(SyncModule module);
+	int remove_sync_module(const SyncModule& module);
 	int remove_sync_module(std::string name);
 	int load_sync_modules();
 	int update_sync_module(std::string name, SyncModule* module);
 	SyncModule* get_module(std::string name);
 private:
-	fs::path find_existing_service(fs::path path);
-	int check_service_validity(fs::path path);
-	int create_db_schema();
 	int remove_sync_module_vector(std::string name);
 	int get_current_unix_time();
-	SyncModule get_sync_module(std::string name);
-	SyncInfo querySyncInfo(std::string name);
-
 };
-#endif // !SYNCSERVICE_H
+#endif

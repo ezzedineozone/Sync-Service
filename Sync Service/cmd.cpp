@@ -1,6 +1,5 @@
 #include "cmd.h"
 #include "sync_service.h"
-#include <filesystem>
 namespace fs = std::filesystem;
 Cmd::Cmd(SyncService* obj) {
 	this->obj = obj;

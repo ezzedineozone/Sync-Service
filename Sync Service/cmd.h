@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include "sync_service.h"
+#include <filesystem>
 class Cmd {
 public:
 	int print_help_functions();

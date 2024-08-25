@@ -1,12 +1,4 @@
 #include "sync_service.h"
-#include <filesystem>
-#include <ShlObj_core.h>
-#include <iostream>
-#include <stdlib.h>
-#include <cstring>
-#include <sstream>
-#include "sqlite3.h"
-#include <chrono>
 namespace fs = std::filesystem;
 
 ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started) : config(config) , db(db), started(started) {
@@ -56,6 +48,7 @@ int ServiceHandler::load_sync_modules() {
 			else
 			{
 				std::cout << "something went wrong querrying from syncinfo \n" << sqlite3_errmsg(db);
+				return 0;
 			}
 			sync_modules_querried = sqlite3_step(ppStmt);
 		}
@@ -73,12 +66,12 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 	if (*module == * new SyncModule())
 	{
 		std::cout << "module not inserted \n";
-		return 1;
+		return 0;
 	}
 	if (!this->started)
 	{
 		std::cout << "Please start the service first, ? or help for more details\n";
-		return 1;
+		return 0;
 	}
 	std::ostringstream str;
 	char* err_msg;
@@ -105,7 +98,7 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 		}
 		else
 		{
-			this->sync_modules.push_back(module);
+			this->sync_modules.push_back(module); 
 		}
 	}
 	else
@@ -155,7 +148,7 @@ int ServiceHandler::remove_sync_module(std::string name)
 		std::cout << "something went wrong removing module\n" << err_msg << "\n";
 	return 0;
 };
-int ServiceHandler::remove_sync_module(SyncModule module)
+int ServiceHandler::remove_sync_module(const SyncModule& module)
 {
 	return remove_sync_module(module.name);
 };
@@ -193,8 +186,33 @@ int ServiceHandler::print_all_modules() {
 };
 int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 	SyncModule* old_module = get_module(name);
-	remove_sync_module(old_module->name);
-	add_sync_module(module);
+	if (!old_module)
+	{
+		std::cout << "Old module not found\n";
+		return 0;
+	}
+	if (*module == SyncModule())
+	{
+		std::cout << "new module invalid\n";
+		return 0;
+	}
+	int sync_module_added = add_sync_module(module);
+	if (!sync_module_added)
+	{
+		int sync_module_removed = remove_sync_module(old_module->name);
+		if (!sync_module_removed)
+		{
+			std::cout << "something went wrong removing old module\n";
+			remove_sync_module(module->name);
+			add_sync_module(old_module);
+			return 1;
+		}
+	}
+	else
+	{
+		std::cout << "something went wrong adding new module\n";
+		return 0;
+	}
 	return 1;
 };
 SyncModule* ServiceHandler::get_module(std::string name) {
