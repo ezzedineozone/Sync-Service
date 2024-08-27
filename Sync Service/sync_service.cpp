@@ -3,11 +3,13 @@ SyncService::SyncService() {
 	this->config = new ServiceConfig();
 	this->handler = new ServiceHandler(this->config, this->db, this->started);
 	this->started = false;
+	this->tcp_server_started = false;
 };
 SyncService::SyncService(fs::path path) {
 	this->config = new ServiceConfig(path);
 	this->handler = new ServiceHandler(this->config, this->db, this->started);
 	this->started = false;
+	this->tcp_server_started = false;
 };
 SyncService::~SyncService() {
 	if (db) {
@@ -97,6 +99,7 @@ int SyncService::instantiate_service() {
 };
 int SyncService::startup_routine() {
 	int modules_loaded = this->handler->load_sync_modules();
+	start_tcp_server();
 	return 1;
 };
 int SyncService::close_service() {
@@ -239,3 +242,15 @@ int SyncService::reset_service() {
 	else
 		return 0;
 };
+int SyncService::start_tcp_server() {
+	try {
+		asio::io_context tcp_io_context;
+		tcp_server server(tcp_io_context);
+		tcp_io_context.run();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+	return 1;
+}

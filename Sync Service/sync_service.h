@@ -14,6 +14,7 @@
 #include <chrono>
 #include "dependencies/sqlite3/sqlite3.h"
 #include "dependencies/json/json.hpp"
+#include "tcp_server.h"
 /*
  * This class manages all operations related to the service boot process, including both initial and subsequent boots.
  * additionally, it handles service termination.
@@ -38,12 +39,16 @@ private:
 	ServiceHandler* handler;
 	ServiceConfig* config;
 	sqlite3* db;
+	bool tcp_server_started;
 
 	int create_files();
-	int close_service();
+	int create_db_schema();
 	int check_service_validity(fs::path path);
 	int find_existing_service(fs::path path);
-	int create_db_schema();
+	int start_tcp_server();
+	int close_service();
+
+
 	
 	bool started;
 	// if handler and config are pointers to the default constructor of both classes, then the service will use

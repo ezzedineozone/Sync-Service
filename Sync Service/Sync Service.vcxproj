@@ -154,6 +154,8 @@
     <ClInclude Include="sync_module.h" />
     <ClInclude Include="sync_service_handler.h" />
     <ClInclude Include="sync_service_config.h" />
+    <ClInclude Include="tcp_connection.h" />
+    <ClInclude Include="tcp_server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

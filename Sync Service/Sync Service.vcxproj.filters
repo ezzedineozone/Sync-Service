@@ -68,5 +68,11 @@
     <ClInclude Include="sync_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tcp_server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp_connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
