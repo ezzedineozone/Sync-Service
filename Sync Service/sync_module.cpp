@@ -37,6 +37,15 @@ SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, 
 
 SyncModule::SyncModule(const SyncModule& module) : SyncModule(module.name, module.source, module.destination, module.type, module.direction, module.info) {};
 
+SyncModule::SyncModule(const nlohmann::json& j)
+{
+    this->name = j["name"].template get<std::string>();
+    this->source = fs::path(j["source"].template get<std::string>());
+    this->destination = fs::path(j["destination"].template get<std::string>());
+    this->type = j["type"].template get<std::string>();
+    this->direction = j["direction"].template get<std::string>();
+    this->info = SyncInfo(j["info"]);
+}
 
 
 
@@ -59,6 +68,18 @@ std::wstring SyncModule::get_source_wstr() {
     return source.wstring();
 }
 
+std::string SyncModule::to_string() {
+    std::ostringstream oss;
+    oss << "SyncModule:\n"
+        << "  Name: " << name << "\n"
+        << "  Source: " << source.string() << "\n"
+        << "  Destination: " << destination.string() << "\n"
+        << "  Type: " << type << "\n"
+        << "  Direction: " << direction << "\n"
+        << "  Info: " << info.to_json().dump(4);
+    return oss.str();
+}
+
 std::wstring SyncModule::get_destination_wstr() {
     return destination.wstring();
 }
@@ -69,6 +90,18 @@ std::string SyncModule::get_type() {
 
 std::string SyncModule::get_direction() {
     return direction;
+}
+
+nlohmann::json SyncModule::to_json()
+{
+    nlohmann::json j;
+    j["name"] = this->name;
+    j["source"] = this->source.string();
+    j["destination"] = this->destination.string();
+    j["type"] = this->type;
+    j["direction"] = this->direction;
+    j["info"] = this->info.to_json();
+    return j;
 }
 
 void SyncModule::set_name(std::string name) {

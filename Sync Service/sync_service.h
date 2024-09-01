@@ -15,6 +15,8 @@
 #include "dependencies/sqlite3/sqlite3.h"
 #include "dependencies/json/json.hpp"
 #include "tcp_server.h"
+#include <thread>
+#include <memory>
 /*
  * This class manages all operations related to the service boot process, including both initial and subsequent boots.
  * additionally, it handles service termination.
@@ -39,6 +41,8 @@ private:
 	ServiceHandler* handler;
 	ServiceConfig* config;
 	sqlite3* db;
+	std::unique_ptr<tcp_server> tcp_server_;
+	asio::io_context tcp_io_context_;
 	bool tcp_server_started;
 
 	int create_files();

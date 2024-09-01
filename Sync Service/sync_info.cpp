@@ -8,6 +8,13 @@
 SyncInfo::SyncInfo(std::string name, int last_sync_date, std::string frequency, int dirty) : name(name), last_sync_date_unix(last_sync_date), frequency(frequency), dirty(dirty) {};
 SyncInfo::SyncInfo(std::string name, std::string frequency) : SyncInfo(name, get_current_unix_time(), std::string(""), 1) {};
 SyncInfo::SyncInfo(std::string name) : SyncInfo(name, std::string("")) {};
+SyncInfo::SyncInfo() {};
+SyncInfo::SyncInfo(const nlohmann::json& j){
+    this->name = j["name"].template get<std::string>();
+    this->last_sync_date_unix = j["last_sync_date_unix"].template get<int>();
+    this->frequency = j["frequency"].template get<std::string>();
+    this->dirty = j["dirty"].template get<int>();
+}
 
 
 int SyncInfo::get_last_sync_date_unix() const {
@@ -21,8 +28,14 @@ std::string SyncInfo::get_frequency() const {
 int SyncInfo::get_dirty() const {
     return dirty;
 }
-
-// Setters
+nlohmann::json SyncInfo::to_json() {
+    nlohmann::json j;
+    j["name"] = this->name;
+    j["last_sync_date_unix"] = this->get_last_sync_date_unix();
+    j["frequency"] = this->get_frequency();
+    j["dirty"] = this->get_dirty();
+    return j;
+}
 void SyncInfo::set_last_sync_date_unix(int lastSyncDateUnix) {
     last_sync_date_unix = lastSyncDateUnix;
 }

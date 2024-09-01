@@ -3,6 +3,8 @@
 #include <filesystem>
 #include "sync_info.h"
 #include <iostream>
+#include "dependencies/json/json.hpp"
+#include "sstream"
 namespace fs = std::filesystem;
 class SyncModule {
 public:
@@ -22,6 +24,7 @@ public:
 	SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, std::string frequency);
 	SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info);
 	SyncModule(const SyncModule& module);
+	SyncModule(const nlohmann::json& j);
 
 
 	fs::path get_source();
@@ -37,8 +40,12 @@ public:
 	void set_destination(fs::path path);
 	void set_type(std::string type);
 	void set_direction(std::string direction);
+	nlohmann::json to_json();
 	
 	bool operator==(const SyncModule other);
+
+
+	std::string to_string();
 private:
 
 };

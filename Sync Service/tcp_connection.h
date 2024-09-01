@@ -22,7 +22,12 @@ public:
     void start()
     {
         message_ = "hi";
+        std::string message_2 = std::string("hi2");
         asio::async_write(socket_, asio::buffer(message_),
+            std::bind(&tcp_connection::handle_write, shared_from_this(),
+                std::placeholders::_1,
+                std::placeholders::_2));
+        asio::async_write(socket_, asio::buffer(message_2),
             std::bind(&tcp_connection::handle_write, shared_from_this(),
                 std::placeholders::_1,
                 std::placeholders::_2));
@@ -37,7 +42,7 @@ private:
     void handle_write(const std::error_code&,
         size_t)
     {
-        std::cout << "written to console";
+        std::cout << "\nwritten to console";
     }
 
     asio::ip::tcp::socket socket_;

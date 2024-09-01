@@ -5,11 +5,12 @@ SyncService::SyncService() {
 	this->started = false;
 	this->tcp_server_started = false;
 };
-SyncService::SyncService(fs::path path) {
+SyncService::SyncService(fs::path path) : tcp_io_context_() {
 	this->config = new ServiceConfig(path);
 	this->handler = new ServiceHandler(this->config, this->db, this->started);
 	this->started = false;
 	this->tcp_server_started = false;
+	this->tcp_server_ = nullptr;
 };
 SyncService::~SyncService() {
 	if (db) {
@@ -243,14 +244,21 @@ int SyncService::reset_service() {
 		return 0;
 };
 int SyncService::start_tcp_server() {
+	std::cout << "starting tcp server...\n";
 	try {
-		asio::io_context tcp_io_context;
-		tcp_server server(tcp_io_context);
-		tcp_io_context.run();
+		tcp_server_ = std::make_unique<tcp_server>(tcp_io_context_);
+		std::thread  tcp_thread([this]{
+			tcp_io_context_.run();
+		});
+		tcp_thread.detach();
+		std::cout << "tcp server started\n";
+		return 1;
 	}
 	catch (std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
+		std::cout << "something went wrong starting tcp server\n";
+		return 0;
 	}
 	return 1;
 }

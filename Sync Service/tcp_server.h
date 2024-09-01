@@ -3,11 +3,12 @@
 #define TCPSERVER_H
 #include "dependencies/asio/asio.hpp"
 #include "tcp_connection.h"
+#include "sync_module.h"
 class tcp_server {
 public:
     tcp_server(asio::io_context& io_context)
         : io_context_(io_context),
-        acceptor_(io_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 25565))
+        acceptor_(io_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 13))
     {
         start_accept();
     }
@@ -28,10 +29,23 @@ private:
     {
         if (!error)
         {
+            std::cout << "\nnew client connected";
             new_connection->start();
         }
 
         start_accept();
+    }
+    void notify_removal(std::string name)
+    {
+
+    }
+    void notify_add(SyncModule module)
+    {
+
+    }
+    void notify_update(std::string name, SyncModule module)
+    {
+
     }
 };
 #endif
