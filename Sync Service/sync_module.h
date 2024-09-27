@@ -40,7 +40,7 @@ public:
 	void set_destination(fs::path path);
 	void set_type(std::string type);
 	void set_direction(std::string direction);
-	nlohmann::json to_json();
+	nlohmann::json to_json() const;
 	
 	bool operator==(const SyncModule other);
 

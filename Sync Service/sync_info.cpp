@@ -28,7 +28,7 @@ std::string SyncInfo::get_frequency() const {
 int SyncInfo::get_dirty() const {
     return dirty;
 }
-nlohmann::json SyncInfo::to_json() {
+nlohmann::json SyncInfo::to_json() const {
     nlohmann::json j;
     j["name"] = this->name;
     j["last_sync_date_unix"] = this->get_last_sync_date_unix();

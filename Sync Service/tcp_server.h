@@ -1,4 +1,3 @@
-#pragma once
 #ifndef TCPSERVER_H
 #define TCPSERVER_H
 #include "dependencies/asio/asio.hpp"
@@ -12,16 +11,40 @@ public:
     {
         start_accept();
     }
+    void notify_add(const SyncModule& module)
+    {
+        for (const auto& connection : connections_)
+        {
+            connection->notify_add(module);
+        }
+    }
+
+    void notify_removal(const std::string& name)
+    {
+        for (const auto& connection : connections_)
+        {
+            connection->notify_removal(name);
+        }
+    }
+
+    void notify_update(const std::string& name, const SyncModule& module)
+    {
+        for (const auto& connection : connections_)
+        {
+            connection->notify_update(name, module);
+        }
+    }
 private:
     asio::io_context& io_context_;
     asio::ip::tcp::acceptor acceptor_;
+    std::vector<tcp_connection::pointer> connections_;
+    ;
     void start_accept()
     {
-        tcp_connection::pointer new_connection =
+        tcp_connection::pointer connection =
             tcp_connection::create(io_context_);
-
-        acceptor_.async_accept(new_connection->socket(),
-            std::bind(&tcp_server::handle_accept, this, new_connection,
+        acceptor_.async_accept(connection->socket(),
+            std::bind(&tcp_server::handle_accept, this, connection,
                 asio::placeholders::error));
     }
     void handle_accept(tcp_connection::pointer new_connection,
@@ -29,23 +52,11 @@ private:
     {
         if (!error)
         {
-            std::cout << "\nnew client connected";
+            this->connections_.push_back(new_connection);
             new_connection->start();
         }
 
         start_accept();
-    }
-    void notify_removal(std::string name)
-    {
-
-    }
-    void notify_add(SyncModule module)
-    {
-
-    }
-    void notify_update(std::string name, SyncModule module)
-    {
-
     }
 };
 #endif

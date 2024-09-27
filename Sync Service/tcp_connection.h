@@ -1,6 +1,6 @@
 #ifndef TCPCONNECTION_H
 #define TCPCONNECTION_H
-
+#include "console.h"
 #include <string>
 #include "dependencies/asio/asio.hpp"
 #include "stdlib.h"
@@ -22,15 +22,42 @@ public:
     void start()
     {
         message_ = "hi";
-        std::string message_2 = std::string("hi2");
         asio::async_write(socket_, asio::buffer(message_),
             std::bind(&tcp_connection::handle_write, shared_from_this(),
                 std::placeholders::_1,
                 std::placeholders::_2));
-        asio::async_write(socket_, asio::buffer(message_2),
-            std::bind(&tcp_connection::handle_write, shared_from_this(),
-                std::placeholders::_1,
-                std::placeholders::_2));
+    }
+    void notify_removal(std::string name)
+    {
+        nlohmann::json j;
+        j["command"] = "remove";
+        j["data"] = name;
+        message_ = j.dump();
+        asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "remove", std::placeholders::_1, std::placeholders::_2));
+    }
+    void notify_add(const SyncModule& module)
+    {
+        nlohmann::json j;
+        j["command"] = "add";
+        j["data"] = module.to_json();
+        message_ = j.dump();
+        asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "add", std::placeholders::_1, std::placeholders::_2));
+    }
+    void notify_update(std::string name, SyncModule module)
+    {
+        nlohmann::json j;
+        j["commnad"] = "update";
+        j["data"] = module.to_json();
+        message_ = j.dump();
+        asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "update", std::placeholders::_1, std::placeholders::_2));
+    }
+    void notify_success(std::string type, const std::error_code& ec, std::size_t bytes_transferred) {
+        if (!ec) {
+            Console::notify("Command '" + type + "' successfully sent. Bytes transferred: " + std::to_string(bytes_transferred) + "\n");
+        }
+        else {
+            Console::notify("Error sending command '" + type + "': " + ec.message() + "\n");
+        }
     }
 private:
     tcp_connection(asio::io_context& io_context)
@@ -39,10 +66,26 @@ private:
 
     }
 
-    void handle_write(const std::error_code&,
-        size_t)
+    void handle_write(const std::error_code& error, std::size_t bytes_transferred)
     {
-        std::cout << "\nwritten to console";
+        if (error)
+        {
+            Console::notify("Error during write: " + error.message());
+            handle_disconnect(error);
+        }
+        else
+        {
+            Console::notify("Data sent successfully, bytes transferred: " + std::to_string(bytes_transferred));
+        }
+    }
+    void handle_disconnect(const std::error_code& ec)
+    {
+        if (ec) {
+            Console::notify("Connection closed with error: " + ec.message());
+        }
+        else {
+            Console::notify("Connection closed gracefully.");
+        }
     }
 
     asio::ip::tcp::socket socket_;

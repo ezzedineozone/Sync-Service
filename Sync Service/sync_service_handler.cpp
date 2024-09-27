@@ -1,11 +1,12 @@
 #include "sync_service.h"
 namespace fs = std::filesystem;
 
-ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started) : config(config) , db(db), started(started) {
+ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started, tcp_server*& server)
+	: config(config), db(db), started(started), tcp_server_(server) {
 	this->sync_modules = std::vector<SyncModule*>();
 	this->types = { "local", "cloud" };
 	this->directions = { "one-way", "two-way", "backup" };
-};
+}
 ServiceHandler::~ServiceHandler() {
 	if (config) {
 		delete config;
@@ -24,7 +25,7 @@ int ServiceHandler::load_sync_modules() {
 	if (sync_modules_querry == SQLITE_OK)
 	{
 
-		std::cout << "sync modules querried succesfully\n";
+		Console::notify("sync modules querried succesfully\n");
 		int sync_modules_querried = sqlite3_step(ppStmt);
 		while (sync_modules_querried == SQLITE_ROW)
 		{
@@ -47,7 +48,7 @@ int ServiceHandler::load_sync_modules() {
 			}
 			else
 			{
-				std::cout << "something went wrong querrying from syncinfo \n" << sqlite3_errmsg(db);
+				Console::notify("something went wrong querrying from syncinfo \n" + std::string(sqlite3_errmsg(db)) + "\n");
 				return 0;
 			}
 			sync_modules_querried = sqlite3_step(ppStmt);
@@ -59,18 +60,18 @@ int ServiceHandler::load_sync_modules() {
 		}
 		return 0;
 	}
-	std::cout << "Error preparing SQL statement: " << sqlite3_errmsg(db) << "\n";
+	Console::notify("Error preparing SQL statement: " + std::string(sqlite3_errmsg(db)) + "\n");
 	return 0;
 };
 int ServiceHandler::add_sync_module(SyncModule* module) {
-	if (*module == * new SyncModule())
+	if (*module == *new SyncModule())
 	{
-		std::cout << "module not inserted \n";
+		Console::notify("module not inserted \n");
 		return 0;
 	}
 	if (!this->started)
 	{
-		std::cout << "Please start the service first, ? or help for more details\n";
+		Console::notify("Please start the service first, ? or help for more details\n");
 		return 0;
 	}
 	std::ostringstream str;
@@ -83,7 +84,7 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 	int sync_module_added = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
 	if (sync_module_added == SQLITE_OK)
 	{
-		std::cout << "Module added succesfully \n";
+		Console::notify("Module added succesfully \n");
 		std::ostringstream sync_info_str;
 		char* sync_info_err;
 		int unix_timestamp = this->get_current_unix_time();
@@ -92,18 +93,19 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 		int sync_info_added = sqlite3_exec(db, sync_info_str.str().c_str(), nullptr, nullptr, &sync_info_err);
 		if (sync_info_added != SQLITE_OK)
 		{
-			std::cout << "something went wrong adding module\n" << sync_info_err << "\n";
+			Console::notify("something went wrong adding module\n" + std::string(sync_info_err) + "\n");
 			this->remove_sync_module(*module);
 			return 0;
 		}
 		else
 		{
-			this->sync_modules.push_back(module); 
+			this->sync_modules.push_back(module);
+			this->tcp_server_->notify_add(*module);
 		}
 	}
 	else
 	{
-		std::cout << "Something went wrong inserting module \n" << err_msg << "\n";
+		Console::notify("Something went wrong inserting module \n" + std::string(err_msg) + "\n");
 		return 0;
 	}
 	return 1;
@@ -117,7 +119,7 @@ int ServiceHandler::remove_sync_module(std::string name)
 {
 	if (!this->started)
 	{
-		std::cout << "Please start the service first, ? or help for more details\n";
+		Console::notify("Please start the service first, ? or help for more details\n");
 		return 1;
 	};
 	std::ostringstream str;
@@ -129,23 +131,23 @@ int ServiceHandler::remove_sync_module(std::string name)
 		int changes = sqlite3_changes(db);
 		if (changes == 0)
 		{
-			std::cout << "Module not found \n";
+			Console::notify("Module not found \n");
 			return 0;
 		}
 		int sync_module_removed_vector = this->remove_sync_module_vector(name);
-		std::cout << "module deleted succesfully\n";
+		Console::notify("module deleted succesfully\n");
 		char* info_err_msg;
 		int info_deleted = sqlite3_exec(db, reinterpret_cast<const char*>((std::string("delete from syncinfo where name == '") + name + std::string("';")).c_str()), nullptr, nullptr, &info_err_msg);
 		changes = sqlite3_changes(db);
 		if (changes == 0)
 		{
-			std::cout << "something went wrong deleting info\n";
+			Console::notify("something went wrong deleting info\n");
 			return 0;
 		}
 		return 1;
 	}
 	else
-		std::cout << "something went wrong removing module\n" << err_msg << "\n";
+		Console::notify("something went wrong removing module\n" + std::string(err_msg) + "\n");
 	return 0;
 };
 int ServiceHandler::remove_sync_module(const SyncModule& module)
@@ -162,25 +164,25 @@ int ServiceHandler::remove_sync_module_vector(std::string name) {
 			delete module;
 			iterator = this->sync_modules.erase(iterator);
 		}
-		else 
+		else
 			iterator++;
 	}
 	return 1;
 };
 int ServiceHandler::print_all_modules() {
-	
+
 	if (!this->started)
 	{
-		std::cout << "Please start the service first, ? or help for more details\n";
+		Console::notify("Please start the service first, ? or help for more details\n");
 		return 1;
 	}
 
 
-	std::cout << "-----------------------------------------\n";
+	Console::notify("-----------------------------------------\n");
 	for (const auto& module : this->sync_modules) {
-		std::cout << "Name: " << module->name << "\n" << "Source: " << module->source << "\n"
-			<< "Destination: " << module->destination << "\n" << "Type: " << module->type << "\n"
-			<< "Direction: " << module->direction << "\n----------------------------------\n";
+		Console::notify("Name: " + module->name + "\n" + "Source: " + module->source.string() + "\n"
+			+ "Destination: " + module->destination.string() + "\n" + "Type: " + module->type + "\n"
+			+ "Direction: " + module->direction + "\n----------------------------------\n");
 	}
 	return 1;
 };
@@ -188,12 +190,12 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 	SyncModule* old_module = get_module(name);
 	if (!old_module)
 	{
-		std::cout << "Old module not found\n";
+		Console::notify("Old module not found\n");
 		return 0;
 	}
 	if (*module == SyncModule())
 	{
-		std::cout << "new module invalid\n";
+		Console::notify("new module invalid\n");
 		return 0;
 	}
 	int sync_module_added = add_sync_module(module);
@@ -202,7 +204,7 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 		int sync_module_removed = remove_sync_module(old_module->name);
 		if (!sync_module_removed)
 		{
-			std::cout << "something went wrong removing old module\n";
+			Console::notify("something went wrong removing old module\n");
 			remove_sync_module(module->name);
 			add_sync_module(old_module);
 			return 1;
@@ -210,7 +212,7 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 	}
 	else
 	{
-		std::cout << "something went wrong adding new module\n";
+		Console::notify("something went wrong adding new module\n");
 		return 0;
 	}
 	return 1;
@@ -225,9 +227,7 @@ SyncModule* ServiceHandler::get_module(std::string name) {
 };
 int ServiceHandler::get_current_unix_time() {
 	auto now = std::chrono::system_clock::now();
-	std::time_t unix_timestamp = std::chrono::system_clock::to_time_t(now);
-	int unix_timestamp_int = static_cast<int>(unix_timestamp);
-
-
-	return unix_timestamp_int;
-}
+	auto duration = now.time_since_epoch();
+	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+	return static_cast<int>(seconds);
+};

@@ -20,7 +20,7 @@ public:
     void set_last_sync_date_unix(int lastSyncDateUnix);
     void set_frequency(std::string frequency);
     void set_dirty(int dirty);
-    nlohmann::json to_json();
+    nlohmann::json to_json() const;
 
 private:
 	int last_sync_date_unix;

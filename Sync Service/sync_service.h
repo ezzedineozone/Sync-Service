@@ -15,8 +15,8 @@
 #include "dependencies/sqlite3/sqlite3.h"
 #include "dependencies/json/json.hpp"
 #include "tcp_server.h"
-#include <thread>
 #include <memory>
+#include <thread>
 /*
  * This class manages all operations related to the service boot process, including both initial and subsequent boots.
  * additionally, it handles service termination.
@@ -29,9 +29,10 @@ public:
 	SyncService();
 	SyncService(fs::path path);
 	SyncService(std::string path);
+	SyncService(const SyncService& other);
 	~SyncService();
-	ServiceHandler* get_handler();
-	ServiceConfig* get_config();
+	ServiceHandler* get_handler() const;
+	ServiceConfig* get_config() const;
 	int instantiate_service();
 	int print_config();
 	int reset_service(); // this function will delete all service files and create them again
@@ -41,7 +42,8 @@ private:
 	ServiceHandler* handler;
 	ServiceConfig* config;
 	sqlite3* db;
-	std::unique_ptr<tcp_server> tcp_server_;
+	tcp_server* tcp_server_;
+	std::unique_ptr<std::thread> tcp_thread_;
 	asio::io_context tcp_io_context_;
 	bool tcp_server_started;
 

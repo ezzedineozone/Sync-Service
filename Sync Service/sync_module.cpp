@@ -92,7 +92,7 @@ std::string SyncModule::get_direction() {
     return direction;
 }
 
-nlohmann::json SyncModule::to_json()
+nlohmann::json SyncModule::to_json() const
 {
     nlohmann::json j;
     j["name"] = this->name;

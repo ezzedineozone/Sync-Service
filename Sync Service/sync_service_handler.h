@@ -5,6 +5,7 @@
 #include "dependencies/sqlite3/sqlite3.h"
 #include "sync_service_config.h"
 #include "sync_module.h"
+#include "tcp_server.h"
 /*
  * This class handles all interactions with the service during its runtime, including defining  functionalities.
  *
@@ -16,13 +17,14 @@ class ServiceHandler {
 public:
 	ServiceConfig* config;
 	sqlite3*& db;
+	tcp_server*& tcp_server_;
 	std::vector<SyncModule*> sync_modules;
 	std::vector<std::string> types;
 	std::vector<std::string> directions;
 
 	bool& started;
 
-	ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started);
+	ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started, tcp_server*& server);
 	~ServiceHandler();
 
 	int add_sync_module(std::string name, fs::path source, fs::path destination, std::string type, std::string direction);
