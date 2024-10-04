@@ -178,3 +178,8 @@ int Console::notify(const std::string& message) {
 	std::cout << message;
 	return 1;
 }
+int Console::notify_concurrent(const std::string& message)
+{
+	std::cout << message << "\n sync_service 0.1.0 (? or help for details): ";
+	return 1;
+}

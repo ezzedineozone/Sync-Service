@@ -43,14 +43,6 @@ public:
         message_ = j.dump();
         asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "add", std::placeholders::_1, std::placeholders::_2));
     }
-    void notify_update(std::string name, SyncModule module)
-    {
-        nlohmann::json j;
-        j["commnad"] = "update";
-        j["data"] = module.to_json();
-        message_ = j.dump();
-        asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "update", std::placeholders::_1, std::placeholders::_2));
-    }
     void notify_success(std::string type, const std::error_code& ec, std::size_t bytes_transferred) {
         if (!ec) {
             Console::notify("Command '" + type + "' successfully sent. Bytes transferred: " + std::to_string(bytes_transferred) + "\n");
@@ -70,21 +62,21 @@ private:
     {
         if (error)
         {
-            Console::notify("Error during write: " + error.message());
+            Console::notify_concurrent("Error during write: " + error.message() + "\n");
             handle_disconnect(error);
         }
         else
         {
-            Console::notify("Data sent successfully, bytes transferred: " + std::to_string(bytes_transferred));
+            Console::notify_concurrent("Data sent successfully, bytes transferred: " + std::to_string(bytes_transferred) + "\n");
         }
     }
     void handle_disconnect(const std::error_code& ec)
     {
         if (ec) {
-            Console::notify("Connection closed with error: " + ec.message());
+            Console::notify_concurrent("Connection closed with error: " + ec.message());
         }
         else {
-            Console::notify("Connection closed gracefully.");
+            Console::notify_concurrent("Connection closed gracefully.");
         }
     }
 

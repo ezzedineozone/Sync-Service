@@ -47,12 +47,12 @@ int SyncService::instantiate_service() {
 	}
 	if (!find_existing_service(this->config->paths.servicePath()))
 	{
-		Console::notify("Looks like sync service isn't currently installed on your pc, would you like to install it? (Y/N):\n");
+		Console::notify("Looks like sync service isn't currently installed on your pc, would you like to install it? (Y/N):");
 		std::string user_answer;
 		std::cin >> user_answer;
 		while (_stricmp(user_answer.c_str(), "y") != 0 && _stricmp(user_answer.c_str(), "n") != 0)
 		{
-			Console::notify("Please enter Y for yes, N for no to answer install service:\n");
+			Console::notify("Please enter Y for yes, N for no to answer install service:");
 			std::cin >> user_answer;
 		}
 		if (_stricmp(user_answer.c_str(), "n") == 0)

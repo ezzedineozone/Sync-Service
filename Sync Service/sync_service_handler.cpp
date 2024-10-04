@@ -136,6 +136,7 @@ int ServiceHandler::remove_sync_module(std::string name)
 		}
 		int sync_module_removed_vector = this->remove_sync_module_vector(name);
 		Console::notify("module deleted succesfully\n");
+		tcp_server_->notify_removal(name);
 		char* info_err_msg;
 		int info_deleted = sqlite3_exec(db, reinterpret_cast<const char*>((std::string("delete from syncinfo where name == '") + name + std::string("';")).c_str()), nullptr, nullptr, &info_err_msg);
 		changes = sqlite3_changes(db);
@@ -149,6 +150,45 @@ int ServiceHandler::remove_sync_module(std::string name)
 	else
 		Console::notify("something went wrong removing module\n" + std::string(err_msg) + "\n");
 	return 0;
+};
+SyncModule ServiceHandler::remove_sync_module_and_keep_copy(const SyncModule& module)
+{
+	return remove_sync_module_and_keep_copy(module.name);
+};
+SyncModule ServiceHandler::remove_sync_module_and_keep_copy(std::string name)
+{
+	if (!this->started)
+	{
+		Console::notify("Please start the service first, ? or help for more details\n");
+	};
+	std::ostringstream str;
+	char* err_msg;
+	str << "DELETE FROM SYNCMODULE WHERE name == '" << name << "';";
+	int module_deleted = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
+	SyncModule module_to_return = SyncModule();
+	if (module_deleted == SQLITE_OK)
+	{
+		int changes = sqlite3_changes(db);
+		if (changes == 0)
+		{
+			Console::notify("Module not found \n");
+		}
+		if (name != "")
+			module_to_return = SyncModule(*get_module(name));
+		int sync_module_removed_vector = this->remove_sync_module_vector(name);
+		Console::notify("module deleted succesfully\n");
+		tcp_server_->notify_removal(name);
+		char* info_err_msg;
+		int info_deleted = sqlite3_exec(db, reinterpret_cast<const char*>((std::string("delete from syncinfo where name == '") + name + std::string("';")).c_str()), nullptr, nullptr, &info_err_msg);
+		changes = sqlite3_changes(db);
+		if (changes == 0)
+		{
+			Console::notify("something went wrong deleting info\n");
+		}
+	}
+	else
+		Console::notify("something went wrong removing module\n" + std::string(err_msg) + "\n");
+	return module_to_return;
 };
 int ServiceHandler::remove_sync_module(const SyncModule& module)
 {
@@ -198,22 +238,22 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 		Console::notify("new module invalid\n");
 		return 0;
 	}
-	int sync_module_added = add_sync_module(module);
-	if (!sync_module_added)
-	{
-		int sync_module_removed = remove_sync_module(old_module->name);
-		if (!sync_module_removed)
-		{
-			Console::notify("something went wrong removing old module\n");
-			remove_sync_module(module->name);
-			add_sync_module(old_module);
-			return 1;
-		}
-	}
-	else
+	SyncModule temp_module = remove_sync_module_and_keep_copy(old_module->name);
+	if (temp_module == SyncModule())
 	{
 		Console::notify("something went wrong adding new module\n");
 		return 0;
+	}
+	else
+	{
+		int sync_module_added = add_sync_module(module);
+		if (!sync_module_added)
+		{
+			Console::notify("something went wrong removing old module\n");
+			remove_sync_module(module->name);
+			add_sync_module(temp_module.name, temp_module.source, temp_module.destination, temp_module.type, temp_module.direction);
+			return 1;
+		}
 	}
 	return 1;
 };

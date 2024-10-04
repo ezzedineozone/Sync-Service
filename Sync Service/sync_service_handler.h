@@ -34,6 +34,8 @@ public:
 	int remove_sync_module(std::string name);
 	int load_sync_modules();
 	int update_sync_module(std::string name, SyncModule* module);
+	SyncModule remove_sync_module_and_keep_copy(const SyncModule& module);
+	SyncModule remove_sync_module_and_keep_copy(std::string name);
 	SyncModule* get_module(std::string name);
 private:
 	int remove_sync_module_vector(std::string name);

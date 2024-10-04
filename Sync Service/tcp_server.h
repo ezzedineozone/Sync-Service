@@ -26,14 +26,6 @@ public:
             connection->notify_removal(name);
         }
     }
-
-    void notify_update(const std::string& name, const SyncModule& module)
-    {
-        for (const auto& connection : connections_)
-        {
-            connection->notify_update(name, module);
-        }
-    }
 private:
     asio::io_context& io_context_;
     asio::ip::tcp::acceptor acceptor_;

@@ -8,6 +8,7 @@ public:
 	static int print_help_functions();
 	static int request_command(SyncService& service);
 	static int notify(const std::string& message);
+	static int notify_concurrent(const std::string& message);
 private:
 	static std::string get_input();
 	static int check_args_validity(std::vector<std::string> args, std::string command,SyncService& obj);
