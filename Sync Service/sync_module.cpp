@@ -13,7 +13,8 @@ SyncModule::SyncModule() : info (SyncInfo(name)) {
     this->direction = "";
 }
 
-SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info) : SyncModule() {
+SyncModule::SyncModule(std::string name, fs::path source, fs::path destination, std::string type, std::string direction, const SyncInfo& info) {
+
     if (fs::exists(source)) {
         if (fs::exists(destination))
         {

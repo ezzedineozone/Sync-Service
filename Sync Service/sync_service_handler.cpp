@@ -64,7 +64,7 @@ int ServiceHandler::load_sync_modules() {
 	return 0;
 };
 int ServiceHandler::add_sync_module(SyncModule* module) {
-	if (*module == *new SyncModule())
+	if (*module == SyncModule())
 	{
 		Console::notify("module not inserted \n");
 		return 0;

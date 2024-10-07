@@ -25,7 +25,7 @@ int Console::print_help_functions() {
 		<< "    example: remove example_module\n\n";
 	return 1;
 };
-int Console::check_args_validity(std::vector<std::string> args, std::string command, SyncService& obj)
+int Console::check_args_validity(std::vector<std::string> args, std::string command)
 {
 	if (command == "add")
 	{
@@ -34,12 +34,12 @@ int Console::check_args_validity(std::vector<std::string> args, std::string comm
 			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
 			return 0;
 		}
-		else if (std::find(obj.get_handler()->types.begin(), obj.get_handler()->types.end(), args.at(4)) == obj.get_handler()->types.end())
+		else if (std::find(service->get_handler()->types.begin(), service->get_handler()->types.end(), args.at(4)) == service->get_handler()->types.end())
 		{
 			std::cout << "Incorrect sync type, valid: local, cloud. \n";
 			return 0;
 		}
-		else if (std::find(obj.get_handler()->directions.begin(), obj.get_handler()->directions.end(), args.at(5)) == obj.get_handler()->directions.end())
+		else if (std::find(service->get_handler()->directions.begin(), service->get_handler()->directions.end(), args.at(5)) == service->get_handler()->directions.end())
 		{
 			std::cout << "Incorrect sync direction, valid: one-way, two-way, backup. \n";
 			return 0;
@@ -109,27 +109,46 @@ std::vector<std::string> Console::parse_arguments(std::string msg) {
 
 	return args;
 };
-int Console::command_handler(std::string msg, SyncService& obj)
+int Console::command_handler_json(const nlohmann::json & j)
+{
+	std::string command = j["command"];
+	if (command == "add")
+	{
+		SyncModule* sync_module = new SyncModule(j["data"]);
+		service->get_handler()->add_sync_module(sync_module);
+		return 1;
+	}
+	else if (command == "remove")
+	{
+		service->get_handler()->remove_sync_module(j["data"].dump());
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+int Console::command_handler(std::string msg)
 {
 	std::vector<std::string> args = Console::parse_arguments(msg);
 	std::string command = args.at(0);
 	if (command == "start")
-		return obj.instantiate_service();
+		return service->instantiate_service();
 	else if (command == "stop")
 	{
-		return obj.instantiate_service();
+		return service->instantiate_service();
 	}
 	else if (command == "add")
 	{
-		int valid = Console::check_args_validity(args, command, obj);
+		int valid = Console::check_args_validity(args, command);
 		if (!valid)
 			return 1;
-		int module_added = obj.get_handler()->add_sync_module(args.at(1), fs::path(args.at(2)), fs::path(args.at(3)), args.at(4), args.at(5));
+		int module_added = service->get_handler()->add_sync_module(args.at(1), fs::path(args.at(2)), fs::path(args.at(3)), args.at(4), args.at(5));
 		return module_added;
 	}
 	else if (command == "config")
 	{
-		return obj.get_config()->print_config();
+		return service->get_config()->print_config();
 	}
 	else if (command == "?" || command == "help")
 	{
@@ -137,27 +156,27 @@ int Console::command_handler(std::string msg, SyncService& obj)
 	}
 	else if (command == "list")
 	{
-		return obj.get_handler()->print_all_modules();
+		return service->get_handler()->print_all_modules();
 	}
 	else if (command == "remove")
 	{
-		int valid = Console::check_args_validity(args, command, obj);
+		int valid = Console::check_args_validity(args, command);
 		if (!valid)
 			return 1;
-		int module_removed = obj.get_handler()->remove_sync_module(args.at(1));
+		int module_removed = service->get_handler()->remove_sync_module(args.at(1));
 	}
 	else if (command == "update")
 	{
-		int valid = Console::check_args_validity(args, command, obj);
+		int valid = Console::check_args_validity(args, command);
 		auto* new_module = new SyncModule(args.at(2), fs::path(args.at(3)), fs::path(args.at(4)), args.at(5), args.at(6));
 		if (valid)
-			return obj.get_handler()->update_sync_module(args.at(1), new_module);
+			return service->get_handler()->update_sync_module(args.at(1), new_module);
 		return 0;
 	}
 	else if (command == "reset")
 	{
 		
-		return obj.reset_service();
+		return service->reset_service();
 	}
 	else if (command == "notify")
 	{
@@ -170,9 +189,9 @@ int Console::command_handler(std::string msg, SyncService& obj)
 		return 1;
 	}
 };
-int Console::request_command(SyncService& service) {
+int Console::request_command() {
 	std::string msg = Console::get_input();
-	return Console::command_handler(msg, service);
+	return Console::command_handler(msg);
 };
 int Console::notify(const std::string& message) {
 	std::cout << message;
@@ -180,6 +199,7 @@ int Console::notify(const std::string& message) {
 }
 int Console::notify_concurrent(const std::string& message)
 {
-	std::cout << message << "\n sync_service 0.1.0 (? or help for details): ";
+	std::cout << message << "\nsync_service 0.1.0 (? or help for details): ";
 	return 1;
 }
+SyncService* Console::service = nullptr;
