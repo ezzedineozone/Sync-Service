@@ -1,4 +1,5 @@
 #include "sync_service.h"
+#include "console.h"
 SyncService::SyncService() {
 	this->config = new ServiceConfig();
 	this->started = false;
@@ -249,7 +250,7 @@ int SyncService::reset_service() {
 int SyncService::start_tcp_server() {
 	Console::notify("starting tcp server...\n");
 	try {
-		tcp_server_ = new tcp_server(tcp_io_context_);
+		tcp_server_ = new tcp_server(tcp_io_context_, *this);
 		this->tcp_thread_ = std::make_unique<std::thread>([this] {
 			tcp_io_context_.run();
 			});

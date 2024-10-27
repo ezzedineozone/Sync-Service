@@ -144,6 +144,7 @@
     <ClCompile Include="stored_paths.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sync_service_config.cpp" />
+    <ClCompile Include="tcp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h" />
@@ -154,8 +155,7 @@
     <ClInclude Include="sync_module.h" />
     <ClInclude Include="sync_service_handler.h" />
     <ClInclude Include="sync_service_config.h" />
-    <ClInclude Include="tcp_connection.h" />
-    <ClInclude Include="tcp_server.h" />
+    <ClInclude Include="tcp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

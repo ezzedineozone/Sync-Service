@@ -1,4 +1,5 @@
 #include "sync_service.h"
+#include "console.h"
 namespace fs = std::filesystem;
 
 ServiceHandler::ServiceHandler(ServiceConfig* config, sqlite3*& db, bool& started, tcp_server*& server)

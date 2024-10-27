@@ -42,6 +42,9 @@
     <ClCompile Include="sync_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tcp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sync_service_handler.h">
@@ -68,10 +71,7 @@
     <ClInclude Include="sync_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tcp_server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tcp_connection.h">
+    <ClInclude Include="tcp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

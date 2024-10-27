@@ -5,7 +5,7 @@
 #include "dependencies/sqlite3/sqlite3.h"
 #include "sync_service_config.h"
 #include "sync_module.h"
-#include "tcp_server.h"
+#include "tcp.h"
 /*
  * This class handles all interactions with the service during its runtime, including defining  functionalities.
  *

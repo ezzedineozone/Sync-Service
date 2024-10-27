@@ -1,6 +1,7 @@
 #ifndef TCPCONNECTION_H
 #define TCPCONNECTION_H
 #include "console.h"
+#include "sync_service.h"
 #include <string>
 #include "dependencies/asio/asio.hpp"
 #include "stdlib.h"
@@ -10,9 +11,9 @@ class tcp_connection
 public:
     typedef std::shared_ptr<tcp_connection> pointer;
     int index_;
-    static pointer create(asio::io_context& io_context, int index)
+    static pointer create(asio::io_context& io_context, int index, const SyncService& service)
     {
-        return pointer(new tcp_connection(io_context, index));
+        return pointer(new tcp_connection(io_context, index, service));
     }
 
     asio::ip::tcp::socket& socket()
@@ -22,7 +23,18 @@ public:
 
     void start()
     {
-        message_ = "hi";
+        nlohmann::json j;
+        std::string command = "init";
+        std::vector<SyncModule*> data = this->service.get_handler()->sync_modules;
+        nlohmann::json jsonData = nlohmann::json::array();
+        for (const auto& module : data) {
+            if (module != nullptr) {
+                jsonData.push_back(module->to_json());
+            }
+        }
+        j["command"] = command;
+        j["data"] = jsonData;
+        message_ = j.dump();
         asio::async_write(socket_, asio::buffer(message_),
             std::bind(&tcp_connection::handle_write, shared_from_this(),
                 std::placeholders::_1,
@@ -72,11 +84,11 @@ public:
         }
     }
 private:
-    tcp_connection(asio::io_context& io_context, int index)
-        : socket_(io_context), index_(index)
+    tcp_connection(asio::io_context& io_context, int index, const SyncService& service)
+        : socket_(io_context), index_(index), service(service)
     {
     }
-
+    const SyncService& service;
     void handle_write(const std::error_code& error, std::size_t bytes_transferred)
     {
         if (error)
