@@ -37,16 +37,30 @@ void tcp_connection::notify_removal(std::string name)
     nlohmann::json j;
     j["command"] = "remove";
     j["data"] = name;
-    message_ = j.dump();
+    message_ = j.dump() + "\r\n";
     asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "remove", std::placeholders::_1, std::placeholders::_2));
 }
-
+void tcp_connection::notify_failure(std::string command, std::string message)
+{
+    nlohmann::json j;
+    j["command"] = "-1";
+    j["data"] = message;
+    message_ = j.dump() + "\r\n";
+    asio::async_write(socket_, asio::buffer(message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "remove", std::placeholders::_1, std::placeholders::_2));
+}
+void tcp_server::notify_failure(std::string command, std::string msg)
+{
+    for (const auto& connection : connections_)
+    {
+        connection->notify_failure (command, msg);
+    }
+}
 void tcp_connection::notify_add(const SyncModule& module)
 {
     nlohmann::json j;
     j["command"] = "add";
     j["data"] = module.to_json();
-    message_ = j.dump();
+    message_ = j.dump() + "\r\n";
     asio::async_write(this->socket_, asio::buffer(this->message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "add", std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -113,7 +127,6 @@ int tcp_connection::handle_recieved_message(const std::string& msg)
     int command_executed = Console::command_handler_json(json_msg);
     return command_executed;
 }
-
 tcp_server::tcp_server(asio::io_context& io_context, const SyncService& service)
     : io_context_(io_context),
     acceptor_(io_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 13)), indexes(0),

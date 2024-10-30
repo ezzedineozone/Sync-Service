@@ -19,7 +19,8 @@ public:
     void notify_removal(std::string name);
     void notify_add(const SyncModule& module);
     void start_reading();
-    void notify_success(std::string type, const std::error_code& ec, std::size_t bytes_transferred);
+    void notify_success(std::string type, const std::error_code& ec, std::size_t bytes_transferred); //useless function (for now)
+    void notify_failure(std::string command, std::string failure_message);
 
 private:
     void handle_write(const std::error_code& error, std::size_t bytes_transferred);
@@ -37,6 +38,7 @@ public:
     ~tcp_server();
     void notify_add(const SyncModule& module);
     void notify_removal(const std::string& name);
+    void notify_failure(std::string command, std::string message);
 
 private:
     void start_accept();

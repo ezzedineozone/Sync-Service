@@ -95,6 +95,7 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 		if (sync_info_added != SQLITE_OK)
 		{
 			Console::notify("something went wrong adding module\n" + std::string(sync_info_err) + "\n");
+			this->tcp_server_->notify_failure("add", "something went wrong adding info\n" + std::string(sync_info_err) + "\n");
 			this->remove_sync_module(*module);
 			return 0;
 		}
@@ -106,7 +107,7 @@ int ServiceHandler::add_sync_module(SyncModule* module) {
 	}
 	else
 	{
-		Console::notify("Something went wrong inserting module \n" + std::string(err_msg) + "\n");
+		this->tcp_server_->notify_failure("add", "something went wrong adding module\n" + std::string(err_msg) + "\n");
 		return 0;
 	}
 	return 1;
@@ -149,7 +150,10 @@ int ServiceHandler::remove_sync_module(std::string name)
 		return 1;
 	}
 	else
+	{
 		Console::notify("something went wrong removing module\n" + std::string(err_msg) + "\n");
+		this->tcp_server_->notify_failure("remove", "something went wrong removing module\n" + std::string(err_msg) + "\n");
+	}	
 	return 0;
 };
 SyncModule ServiceHandler::remove_sync_module_and_keep_copy(const SyncModule& module)
@@ -243,6 +247,7 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 	if (temp_module == SyncModule())
 	{
 		Console::notify("something went wrong adding new module\n");
+		this->tcp_server_->notify_failure("add", "something went wrong adding new module\n");
 		return 0;
 	}
 	else
@@ -251,6 +256,7 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 		if (!sync_module_added)
 		{
 			Console::notify("something went wrong removing old module\n");
+			this->tcp_server_->notify_failure("add", "something went wrong removing old module\n");
 			remove_sync_module(module->name);
 			add_sync_module(temp_module.name, temp_module.source, temp_module.destination, temp_module.type, temp_module.direction);
 			return 1;
