@@ -22,7 +22,7 @@ The application expects the dependencies to be located in the following paths:
 
 - **ASIO**:  
   - `Sync Service/dependencies/asio/`  
-  - Place `asio.hpp` in this directory, with the `asio` include folder.
+  - Place `asio.hpp` in this directory, with the `asio` folder.
 
 - **nlohmann JSON**:  
   - `Sync Service/dependencies/json/`  
