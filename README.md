@@ -1,6 +1,7 @@
 
 
-### NOTE: This is the repository for the local desktop service (functionality only no ui) built using C++
+### NOTE: 
+This is the repository for the local desktop service (functionality only no ui) built using C++
 
 ### GENERAL PROGRESS REPORT: 
 The service now is mostly done for when it comes to getting, saving and handling sync tasks, the UI correctly connects to it and recieves from it all the required information, and the UI currently can be used to add or remove sync tasks.
