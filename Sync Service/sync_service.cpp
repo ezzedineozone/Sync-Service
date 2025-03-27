@@ -180,7 +180,7 @@ int SyncService::create_db_schema() {
 	}
 	else
 	{
-		const char* sync_module_statement = "CREATE TABLE SYNCMODULE(name TEXT PRIMARY KEY, source VARCHAR(259) NOT NULL, destination VARCHAR(259) NOT NULL, type VARCHAR(15) NOT NULL, direction VARCHAR(15) NOT NULL);";
+		const char* sync_module_statement = "CREATE TABLE SYNCMODULE(name TEXT PRIMARY KEY COLLATE NOCASE, source VARCHAR(259) NOT NULL, destination VARCHAR(259) NOT NULL, type VARCHAR(15) NOT NULL, direction VARCHAR(15) NOT NULL);";
 		char* sync_module_error_msg;
 		int sync_module_table_created = sqlite3_exec(db, sync_module_statement, nullptr, nullptr, &sync_module_error_msg);
 		if (sync_module_table_created == SQLITE_OK)
