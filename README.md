@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# Sync Service
-
-### Build Instructions
-=======
 
 
 ### NOTE: 
@@ -38,7 +33,6 @@ Two main parts, [the UI](https://github.com/ezzedineozone/Sync-Service-Ui) for e
 - send all logs to the UI so that the UI displays them in a log window
 
 ### Build Instructions BELOW
->>>>>>> 4f333a3f35a9f1658726b1b756a8295edc1b1b75
 
 To compile this application, ensure all dependencies are correctly included in your project. Verify that `#include` statements for each dependency are valid.
 
@@ -65,4 +59,3 @@ The application expects the dependencies to be located in the following paths:
 - **nlohmann JSON**:  
   - `Sync Service/dependencies/json/`  
   - Place `json.hpp` in this directory.
-

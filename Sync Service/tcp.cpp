@@ -71,13 +71,16 @@ void tcp_connection::start_reading() {
         std::error_code error;
 
         size_t len = socket_.read_some(asio::buffer(buf), error);
-        if (error == asio::error::eof)
-        {
-            std::cout << "connection closed";
+        if (error == asio::error::eof) {
+            Console::notify("Connection closed by client.");
+            handle_disconnect(error);
             break;
         }
-        else if (error)
-            throw std::system_error(error);
+        else if (error) {
+            Console::notify("Error during read: " + error.message());
+            handle_disconnect(error);
+            break;
+        }
 
         msg.append(buf.data(), len);
         handle_recieved_message(msg);
