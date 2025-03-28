@@ -120,7 +120,7 @@ int Console::command_handler_json(const nlohmann::json & j)
 	}
 	else if (command == "remove")
 	{
-		service->get_handler()->remove_sync_module(j["data"].dump());
+		service->get_handler()->remove_sync_module(j["data"].get<std::string>());
 		return 1;
 	}
 	else

@@ -126,7 +126,7 @@ int ServiceHandler::remove_sync_module(std::string name)
 	};
 	std::ostringstream str;
 	char* err_msg;
-	str << "DELETE FROM SYNCMODULE WHERE name == '" << name << "';";
+	str << "DELETE FROM SYNCMODULE WHERE name = \'" << name << "\';";
 	int module_deleted = sqlite3_exec(db, str.str().c_str(), nullptr, nullptr, &err_msg);
 	if (module_deleted == SQLITE_OK)
 	{
