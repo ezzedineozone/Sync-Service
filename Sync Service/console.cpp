@@ -123,6 +123,9 @@ int Console::command_handler_json(const nlohmann::json & j)
 		service->get_handler()->remove_sync_module(j["data"].get<std::string>());
 		return 1;
 	}
+	else if (command == "edit") {
+		service->get_handler()->update_sync_module(j["data"]["name"].get<std::string>(), new SyncModule(j["data"]["module"]));
+	}
 	else
 	{
 		return 0;

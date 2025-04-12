@@ -244,6 +244,7 @@ int ServiceHandler::update_sync_module(std::string name, SyncModule* module) {
 		return 0;
 	}
 	SyncModule temp_module = remove_sync_module_and_keep_copy(old_module->name);
+
 	if (temp_module == SyncModule())
 	{
 		Console::notify("something went wrong adding new module\n");
