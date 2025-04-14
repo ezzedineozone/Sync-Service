@@ -95,6 +95,13 @@ void tcp_connection::notify_success(std::string type, const std::error_code& ec,
         Console::notify("Error sending command '" + type + "': " + ec.message() + "\n");
     }
 }
+void tcp_connection::notify_progress(std::string name, float progress) {
+    nlohmann::json j;
+    j["command"] = "progress";
+    j["data"] = { {"name", name}, {"progress", progress} };
+    message_ = j.dump() + "\r\n";
+    asio::async_write(this->socket_, asio::buffer(this->message_), std::bind(&tcp_connection::notify_success, shared_from_this(), "progress", std::placeholders::_1, std::placeholders::_2));
+}
 
 tcp_connection::tcp_connection(asio::io_context& io_context, int index, const SyncService& service)
     : socket_(io_context), index_(index), service(service)
@@ -186,4 +193,11 @@ void tcp_server::handle_accept(tcp_connection::pointer new_connection, const std
     }
 
     start_accept();
+}
+void tcp_server::notify_progress(std::string name, float progress)
+{
+	for (const auto& connection : connections_)
+	{
+		connection->notify_progress(name, progress);
+	}
 }

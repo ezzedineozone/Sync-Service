@@ -37,8 +37,16 @@ public:
 	SyncModule remove_sync_module_and_keep_copy(const SyncModule& module);
 	SyncModule remove_sync_module_and_keep_copy(std::string name);
 	SyncModule* get_module(std::string name);
+
+	int sync(const SyncModule& module);
+
+	int work_oneway(const SyncModule& module);
+	int work_twoway(const SyncModule& module);
+	int work_backup(const SyncModule& module);
+
 private:
 	int remove_sync_module_vector(std::string name);
 	int get_current_unix_time();
+	float get_path_size(fs::path path);
 };
 #endif

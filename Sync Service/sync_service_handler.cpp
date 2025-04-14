@@ -278,4 +278,104 @@ int ServiceHandler::get_current_unix_time() {
 	auto duration = now.time_since_epoch();
 	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 	return static_cast<int>(seconds);
+}
+
+int ServiceHandler::work_oneway(const SyncModule& module) {
+	if(module.direction.compare("one-way") != 0)
+	{
+		Console::notify("Module is not one-way\n");
+		return 0;
+	}
+	if (!this->started)
+	{
+		Console::notify("Please start the service first, ? or help for more details\n");
+		return 1;
+	}
+	if(module.type.compare("local") == 0)
+	{
+		Console::notify("working one way local\n");
+		std::string source = module.source.string();
+		std::string destination = module.destination.string();
+		if (!fs::exists(source))
+		{
+			Console::notify("Source path does not exist\n");
+			return 0;
+		}
+		if (!fs::exists(destination))
+		{
+			Console::notify("Destination path does not exist\n");
+			return 0;
+		}
+		if (module.info.get_dirty() == 0)
+		{
+			Console::notify("Destination path isn't dirty\n");
+			return 0;
+		}
+		Console::notify("Syncing from " + source + " to " + destination + "\n");
+		float size = get_path_size(fs::path(source));
+		float progress = 0;
+		for (const auto& entry : fs::recursive_directory_iterator(source))
+		{
+			fs::path source_path = entry.path();
+			fs::path destination_path = destination / source_path.filename();
+			if (fs::exists(destination_path))
+			{
+				if (fs::is_regular_file(source_path) && fs::is_regular_file(destination_path))
+				{
+					std::ifstream source_file(source_path, std::ios::binary);
+					std::ifstream destination_file(destination_path, std::ios::binary);
+					std::string source_hash = std::to_string(std::hash<std::string>{}(std::string((std::istreambuf_iterator<char>(source_file)), std::istreambuf_iterator<char>())));
+					std::string destination_hash = std::to_string(std::hash<std::string>{}(std::string((std::istreambuf_iterator<char>(destination_file)), std::istreambuf_iterator<char>())));
+					if (source_hash == destination_hash)
+					{
+						Console::notify("File " + source_path.string() + " already exists in destination\n");
+						progress += (fs::file_size(destination_path) / size);
+						this->tcp_server_->notify_progress(module.name, progress);
+						continue;
+					}
+				}
+			}
+			fs::copy(source_path, destination_path, fs::copy_options::overwrite_existing);
+			Console::notify("Copied " + source_path.string() + " to " + destination_path.string() + "\n");
+			progress += (fs::file_size(destination_path) / size);
+			this->tcp_server_->notify_progress(module.name, progress);
+		}
+	}
+	else if (module.type.compare("cloud") == 0)
+	{
+		Console::notify("working one way cloud\n");
+	}
+	else
+	{
+		Console::notify("Module type not supported\n");
+		return 0;
+	}
 };
+
+float ServiceHandler::get_path_size(fs::path path) {
+	if (fs::is_regular_file(path)) {
+		return static_cast<float>(fs::file_size(path));
+	}
+	else {
+		float total_size = 0;
+		for (auto& entry : fs::recursive_directory_iterator(path)) {
+			if (fs::is_regular_file(entry.path())) {
+				total_size += static_cast<float>(fs::file_size(entry.path()));
+			}
+		}
+		return total_size;
+	}
+}
+int ServiceHandler::sync(const SyncModule& module) {
+	if(module.direction.compare("one-way") == 0)
+	{
+		return this->work_oneway(module);
+	}
+	//else if(module.direction.compare("two-way") == 0)
+	//{
+	//	return this->work_twoway(module);
+	//} else if(module.direction.compare("backup") == 0)
+	//{
+	//	return this->work_backup(module);
+	//}
+}

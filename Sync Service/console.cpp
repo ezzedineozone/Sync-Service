@@ -71,6 +71,13 @@ int Console::check_args_validity(std::vector<std::string> args, std::string comm
 			return 0;
 		}
 	}
+	if (command == "progress") {
+		if (args.size() != 2)
+		{
+			std::cout << "Number of arguments invalid, type ? or help for more details.\n";
+			return 0;
+		}
+	}
 };
 std::vector<std::string> Console::parse_arguments(std::string msg) {
 	std::istringstream stream(msg);
@@ -125,6 +132,9 @@ int Console::command_handler_json(const nlohmann::json & j)
 	}
 	else if (command == "edit") {
 		service->get_handler()->update_sync_module(j["data"]["name"].get<std::string>(), new SyncModule(j["data"]["module"]));
+	}
+	else if (command == "sync") {
+		service->get_handler()->sync(*(service->get_handler()->get_module(j["data"].get<std::string>())));
 	}
 	else
 	{
@@ -185,6 +195,17 @@ int Console::command_handler(std::string msg)
 	{
 		std::cout << args.at(1);
 		return 1;
+	}
+	else if (command == "sync") {
+		int valid = Console::check_args_validity(args, command);
+		if (!valid)
+			return 1;
+		SyncModule* module = service->get_handler()->get_module(args.at(1));
+		if (module == nullptr) {
+			std::cout << "Module not found\n";
+			return 1;
+		}
+		service->get_handler()->sync(*module);
 	}
 	else
 	{
